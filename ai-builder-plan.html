@@ -294,21 +294,88 @@
 
 </div>
 
-<!-- ===== SECTION 3: MY SYSTEM ===== -->
+<!-- ===== SECTION 3: SPRINT 2 ===== -->
+<div class="section">
+  <div class="section-title">Sprint 2 — What I Built</div>
+
+  <!-- Kanban Dashboard -->
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 01 · Interface</div>
+        <div class="auto-outcome">Live kanban board with 6 automation ideas as draggable cards — status updates persist to Notion in real time.</div>
+      </div>
+      <div><div class="hours-badge">Live ↗</div></div>
+    </div>
+    <div><div class="field-label">What was built</div><div class="field-body">Deployed <strong>ai-builder-dashboard.html</strong> — a fully branded 47G kanban board with four columns (Suggested, To Build, In Progress, Done). Each card represents one automation from the roadmap with priority badge, description, and drag-to-move behavior.</div></div>
+    <div><div class="field-label">How it works</div><div class="field-body">On load, the board fetches live data from the Notion backend via <code>/api/roadmap</code>. Dragging a card to a new column fires a PATCH request that updates the Status field on the Notion page directly — no sync required, no export step.</div></div>
+    <div class="auto-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge quick">Quick Win · 1 session</span></div>
+      <a href="https://ai-builder-blond.vercel.app/ai-builder-dashboard.html" target="_blank" class="audit-link">Open Dashboard ↗</a>
+    </div>
+  </div>
+
+  <!-- Notion Backend -->
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 02 · Backend</div>
+        <div class="auto-outcome">Notion database wired as the live source of truth for all automation work — no more status living only in a static HTML file.</div>
+      </div>
+      <div><div class="hours-badge">Live ↗</div></div>
+    </div>
+    <div><div class="field-label">What was built</div><div class="field-body">Created the <strong>AI Automation Roadmap</strong> database in Notion with fields for Name, Description, Priority, Status, Submitted By, and Submitted At. Built a serverless API (<code>/api/roadmap.js</code>) deployed to Vercel with GET (fetch all rows) and PATCH (update Status by page ID) endpoints.</div></div>
+    <div><div class="field-label">How it works</div><div class="field-body">The API reads <code>NOTION_TOKEN</code> and <code>NOTION_DATABASE_ID</code> from Vercel environment variables — credentials never touch the frontend. Notion Status values map cleanly to board columns (e.g. "In Progress" → <code>in-progress</code>), so the board always reflects the real state of the roadmap.</div></div>
+    <div class="auto-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge quick">Quick Win · 1 session</span></div>
+      <a href="https://ai-builder-blond.vercel.app/api/roadmap" target="_blank" class="audit-link">Live API ↗</a>
+    </div>
+  </div>
+
+  <!-- Automation Advisor Agent -->
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 03 · Agent</div>
+        <div class="auto-outcome">Automation advisor agent reads the live roadmap and session history, then delivers a 60-second briefing — priorities, stalls, and one automation to add next.</div>
+      </div>
+      <div><div class="hours-badge">Runs on demand</div></div>
+    </div>
+    <div><div class="field-label">What was built</div><div class="field-body">A Claude Code agent that pulls current card statuses from the Notion API, reviews Claude Code session history for stalls and patterns, and outputs a structured briefing: what's moving, what's stuck, and one concrete automation recommendation to add to the roadmap.</div></div>
+    <div><div class="field-label">How it works</div><div class="field-body">Trigger it any time before a build session or weekly review. The agent returns a plain-language briefing in under 60 seconds — no dashboard to open, no spreadsheet to update. The recommendation feeds directly back into the Notion roadmap if you accept it.</div></div>
+    <div class="auto-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge medium">Medium Lift · 1 session</span></div>
+      <span class="status-badge" style="background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#34d399;">Done</span>
+    </div>
+  </div>
+
+  <!-- Live URLs -->
+  <div class="insight-card cyan" style="margin-top: 4px;">
+    <div class="insight-num">Live URLs — Sprint 2</div>
+    <div class="insight-title">Everything is deployed and publicly accessible</div>
+    <div class="insight-body" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+      <div><strong>Time Audit</strong> — <a href="https://ai-builder-blond.vercel.app/time-audit.html" target="_blank" style="color:#22d3ee;">ai-builder-blond.vercel.app/time-audit.html</a></div>
+      <div><strong>Automation Plan</strong> — <a href="https://ai-builder-blond.vercel.app/ai-builder-plan.html" target="_blank" style="color:#22d3ee;">ai-builder-blond.vercel.app/ai-builder-plan.html</a></div>
+      <div><strong>Dashboard</strong> — <a href="https://ai-builder-blond.vercel.app/ai-builder-dashboard.html" target="_blank" style="color:#22d3ee;">ai-builder-blond.vercel.app/ai-builder-dashboard.html</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: MY SYSTEM ===== -->
 <div class="section">
   <div class="section-title">My System — Sprint Roadmap</div>
   <div class="sprint-grid">
 
-    <div class="sprint-card current">
-      <div class="sprint-label active">S1 · Current</div>
+    <div class="sprint-card" style="opacity:0.6;">
+      <div class="sprint-label">S1 · Done</div>
       <div class="sprint-name">Time Audit + AI Builder Plan</div>
-      <div class="sprint-coming" style="color:#818cf8; border-top-color:rgba(99,102,241,0.2);">In progress</div>
+      <div class="sprint-coming" style="color:#34d399; border-top-color:rgba(16,185,129,0.2);">Complete</div>
     </div>
 
-    <div class="sprint-card">
-      <div class="sprint-label">S2</div>
+    <div class="sprint-card current">
+      <div class="sprint-label active">S2 · Current</div>
       <div class="sprint-name">Deployed website + data collection tool</div>
-      <div class="sprint-coming">Coming in Sprint 2</div>
+      <div class="sprint-coming" style="color:#818cf8; border-top-color:rgba(99,102,241,0.2);">In progress</div>
     </div>
 
     <div class="sprint-card">
