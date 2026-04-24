@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Audit — Gerritt Vander Linden</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3148;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #12152a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 32px;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .goal-badge {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .header .meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .header .subtitle { font-size: 16px; color: var(--muted); margin-top: 4px; }
+
+  /* Layout */
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 48px; }
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+  /* Bar chart rows */
+  .bar-row { margin-bottom: 12px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .bar-label .name { font-weight: 500; }
+  .bar-label .val { color: var(--muted); }
+  .bar-track { background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-fill.indigo { background: linear-gradient(90deg, #4f46e5, #818cf8); }
+  .bar-fill.cyan { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+  .bar-fill.amber { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .bar-fill.green { background: linear-gradient(90deg, #059669, #34d399); }
+  .bar-fill.purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+  .bar-fill.rose { background: linear-gradient(90deg, #e11d48, #fb7185); }
+  .bar-fill.slate { background: linear-gradient(90deg, #475569, #94a3b8); }
+
+  /* Stat rows */
+  .stat-block { display: flex; flex-direction: column; gap: 6px; }
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface2); border-radius: 8px; font-size: 13px; }
+  .stat-row .label { color: var(--muted); }
+  .stat-row .value { font-weight: 600; }
+  .stat-row .value.green { color: #34d399; }
+  .stat-row .value.amber { color: #fbbf24; }
+  .stat-row .value.red { color: #f87171; }
+  .stat-row .value.cyan { color: #22d3ee; }
+
+  /* Pills */
+  .pill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; border-radius: 20px; padding: 3px 10px; }
+  .pill.green { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+  .pill.amber { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+  .pill.red { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+  .pill.indigo { background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); color: #818cf8; }
+  .flag { display: inline-flex; align-items: center; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 8px; margin-left: 6px; }
+
+  /* Diagnostic cards */
+  .diagnostic {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .diagnostic::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+  .diagnostic.red::before { background: #ef4444; }
+  .diagnostic.amber::before { background: #f59e0b; }
+  .diagnostic.cyan::before { background: #22d3ee; }
+  .diagnostic-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .diagnostic-value { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .diagnostic-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Automation cards */
+  .automation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .automation-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .automation-rank { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .automation-outcome { font-size: 16px; font-weight: 700; line-height: 1.4; }
+  .hours-badge { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; font-size: 13px; font-weight: 700; border-radius: 8px; padding: 4px 12px; white-space: nowrap; }
+  .field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .field-body { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .automation-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+  .effort-badge { font-size: 12px; font-weight: 600; border-radius: 8px; padding: 4px 12px; }
+  .effort-badge.quick { background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); color: #818cf8; }
+  .effort-badge.medium { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+  .effort-badge.big { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+
+  /* Day heatmap */
+  .day-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .day-cell { background: var(--surface2); border-radius: 8px; padding: 10px 12px; border: 1px solid transparent; }
+  .day-cell .dn { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .day-cell .dd { font-size: 12px; color: var(--muted); }
+  .day-cell .ds { font-size: 22px; font-weight: 700; margin: 4px 0; }
+  .day-cell .dm { font-size: 11px; color: var(--muted); }
+  .day-cell.high { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); }
+  .day-cell.high .ds { color: #f87171; }
+  .day-cell.med { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.04); }
+  .day-cell.med .ds { color: #fbbf24; }
+  .day-cell.low { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); }
+  .day-cell.low .ds { color: #34d399; }
+
+  /* Observations */
+  .observation { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
+  .obs-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .obs-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .obs-body strong { color: var(--text); }
+
+  /* Goal rows */
+  .goal-row { margin-bottom: 20px; }
+  .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .goal-name { font-size: 14px; font-weight: 600; }
+
+  /* Source table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+  td:first-child { color: var(--text); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .container, .header, .footer { padding: 24px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .day-grid { grid-template-columns: repeat(3, 1fr); }
+    .automation-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Gerritt Vander Linden</h1>
+      <div class="subtitle">VP, Commercial Partnerships &amp; Growth · 47G</div>
+      <div class="meta">Time Audit · April 21, 2026 · Last 14 working days (Apr 1–21, 2026)</div>
+    </div>
+    <div class="goal-badge">#1 Goal: 35% YoY Revenue Growth</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== SECTION 1: HOW I ACTUALLY SPEND MY TIME ===== -->
+<div class="section">
+  <div class="section-title">How I Actually Spend My Time</div>
+
+  <!-- App Usage -->
+  <div style="margin-bottom: 32px;">
+    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--muted);">App Usage — Top 10 (weekdays 8am–6:30pm, 14 days)</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Hours in app</div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Arc Browser</span><span class="val">36.6h · primary workspace</span></div><div class="bar-track"><div class="bar-fill indigo" style="width:100%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Superhuman</span><span class="val">18.3h · email</span></div><div class="bar-track"><div class="bar-fill cyan" style="width:50%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Messages</span><span class="val">7.4h · iMessage / SMS</span></div><div class="bar-track"><div class="bar-fill amber" style="width:20%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Claude</span><span class="val">2.7h · AI assistant</span></div><div class="bar-track"><div class="bar-fill green" style="width:7.4%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Zoom</span><span class="val">1.6h · video calls</span></div><div class="bar-track"><div class="bar-fill purple" style="width:4.4%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Things</span><span class="val">1.0h · task management</span></div><div class="bar-track"><div class="bar-fill slate" style="width:2.7%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Notes</span><span class="val">0.8h</span></div><div class="bar-track"><div class="bar-fill slate" style="width:2.2%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Ghostty</span><span class="val">0.35h · terminal / Claude Code</span></div><div class="bar-track"><div class="bar-fill indigo" style="width:1%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Telegram</span><span class="val">0.22h · messaging</span></div><div class="bar-track"><div class="bar-fill slate" style="width:0.6%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">ClickUp</span><span class="val">0.17h · project mgmt</span></div><div class="bar-track"><div class="bar-fill slate" style="width:0.5%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Reading the numbers</div>
+        <div class="stat-block">
+          <div class="stat-row"><span class="label">Browser = 55% of tracked time</span><span class="value cyan">36.6h</span></div>
+          <div class="stat-row"><span class="label">Email = second job</span><span class="value amber">1.3h/day in inbox</span></div>
+          <div class="stat-row"><span class="label">Messaging (Messages + Telegram)</span><span class="value">7.6h combined</span></div>
+          <div class="stat-row"><span class="label">AI tools (Claude desktop)</span><span class="value green">2.7h</span></div>
+          <div class="stat-row"><span class="label">Zoom (undercount — most calls use Meet in Arc)</span><span class="value">1.6h</span></div>
+          <div class="stat-row"><span class="label">Total app sessions tracked</span><span class="value">~5,200 in 14 days</span></div>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.5;">Zoom underrepresents video call time — most external calls go through Google Meet, which runs inside Arc and isn't separated out here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Browser -->
+  <div style="margin-bottom: 32px;">
+    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--muted);">Browser Activity — Work Profile (4,601 filtered work-hours visits)</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Top 10 domains</div>
+        <div class="bar-row"><div class="bar-label"><span class="name">linkedin.com <span class="flag">⚠ 22%</span></span><span class="val">1,014 visits</span></div><div class="bar-track"><div class="bar-fill rose" style="width:100%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">calendar.google.com</span><span class="val">987 (21%)</span></div><div class="bar-track"><div class="bar-fill indigo" style="width:97%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">app.hubspot.com</span><span class="val">771 (17%)</span></div><div class="bar-track"><div class="bar-fill cyan" style="width:76%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">google.com</span><span class="val">318 (7%)</span></div><div class="bar-track"><div class="bar-fill slate" style="width:31%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">docs.google.com</span><span class="val">206 (4%)</span></div><div class="bar-track"><div class="bar-fill green" style="width:20%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">luma.com</span><span class="val">153 (3%)</span></div><div class="bar-track"><div class="bar-fill amber" style="width:15%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">meet.google.com</span><span class="val">108 (2%)</span></div><div class="bar-track"><div class="bar-fill indigo" style="width:11%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">drive.google.com</span><span class="val">88 (2%)</span></div><div class="bar-track"><div class="bar-fill green" style="width:9%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">gemini.google.com</span><span class="val">54 (1%)</span></div><div class="bar-track"><div class="bar-fill purple" style="width:5%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">47g.bamboohr.com</span><span class="val">36 (1%)</span></div><div class="bar-track"><div class="bar-fill slate" style="width:4%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">By category</div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Social (LinkedIn)</span><span class="val">1,039 · 23%</span></div><div class="bar-track"><div class="bar-fill rose" style="width:100%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Other (Calendar, Search, Luma, HR)</span><span class="val">2,396 · 52%</span></div><div class="bar-track"><div class="bar-fill slate" style="width:52%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">CRM / Ops (HubSpot)</span><span class="val">772 · 17%</span></div><div class="bar-track"><div class="bar-fill cyan" style="width:35%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Docs / Research (Docs, Drive)</span><span class="val">315 · 7%</span></div><div class="bar-track"><div class="bar-fill green" style="width:15%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">AI Tools (Gemini, Claude.ai)</span><span class="val">70 · 2%</span></div><div class="bar-track"><div class="bar-fill purple" style="width:5%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Comms (email in browser)</span><span class="val">9 · &lt;1%</span></div><div class="bar-track"><div class="bar-fill amber" style="width:1%"></div></div></div>
+        <div style="margin-top: 14px; padding: 10px 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; font-size: 12px; color: #f87171; line-height: 1.5;">
+          ⚠️ LinkedIn at 23% of work-hours browser visits exceeds the 5% flag threshold. It is the single biggest browser destination — more than HubSpot and Google Calendar combined.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar -->
+  <div style="margin-bottom: 32px;">
+    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--muted);">Calendar — Meeting Breakdown (Apr 1–21, weekdays 8am–6:30pm, 130 events)</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Hours by type</div>
+        <div class="bar-row" style="margin-top:8px;"><div class="bar-label"><span class="name">Focus / Time Blocks</span><span class="val">54.0h</span></div><div class="bar-track"><div class="bar-fill green" style="width:100%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">External Calls</span><span class="val">19.8h</span></div><div class="bar-track"><div class="bar-fill cyan" style="width:37%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">1:1 Meetings</span><span class="val">19.8h</span></div><div class="bar-track"><div class="bar-fill indigo" style="width:37%"></div></div></div>
+        <div class="bar-row"><div class="bar-label"><span class="name">Team Meetings</span><span class="val">12.0h</span></div><div class="bar-track"><div class="bar-fill amber" style="width:22%"></div></div></div>
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border); font-size:13px; color:var(--muted);">
+          Real meetings (excl. solo focus blocks): <strong style="color:var(--text);">51.6h · 3.4h/day avg</strong>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Daily stats</div>
+        <div class="stat-block" style="margin-top:8px;">
+          <div class="stat-row"><span class="label">Avg real meetings/day</span><span class="value amber">3.4h</span></div>
+          <div class="stat-row"><span class="label">Busiest day</span><span class="value red">Fri Apr 17 · 9.8h</span></div>
+          <div class="stat-row"><span class="label">Lightest day</span><span class="value green">Wed Apr 8 · 4.2h</span></div>
+          <div class="stat-row"><span class="label">Back-to-back pairs</span><span class="value red">56 instances</span></div>
+          <div class="stat-row"><span class="label">Days with 7h+ calendar blocked</span><span class="value amber">9 of 15</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recurring (2+ times)</div>
+        <div class="stat-block" style="margin-top:8px;">
+          <div class="stat-row"><span class="label">TIME BLOCK · Wrap Up</span><span class="value">13×</span></div>
+          <div class="stat-row"><span class="label">TIME BLOCK · Lunch + Walk</span><span class="value">12×</span></div>
+          <div class="stat-row"><span class="label">TIME BLOCK · Prepare for day</span><span class="value">11×</span></div>
+          <div class="stat-row"><span class="label">47G All-Hands Meeting</span><span class="value">3×</span></div>
+          <div class="stat-row"><span class="label">47G Monday Team Lunch</span><span class="value">3×</span></div>
+          <div class="stat-row"><span class="label">Weekly Review</span><span class="value">3×</span></div>
+          <div class="stat-row"><span class="label">Investor Relations Weekly</span><span class="value">2×</span></div>
+          <div class="stat-row"><span class="label">IMA Briefing Meeting</span><span class="value">2×</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email -->
+  <div>
+    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--muted);">Email — gerritt@47g.org (last 30 days)</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">What I send repeatedly</div>
+        <div class="stat-block" style="margin-top:8px;">
+          <div class="stat-row"><span class="label">Personalized mass outreach (same template, sent 1-by-1)</span><span class="value amber">High volume</span></div>
+          <div class="stat-row"><span class="label">WTC Utah Summit invites</span><span class="value">~12 individual emails</span></div>
+          <div class="stat-row"><span class="label">Kazakhstan delegation invites</span><span class="value">~9 individual emails</span></div>
+          <div class="stat-row"><span class="label">Partnership plans / proposals</span><span class="value cyan">Recurring</span></div>
+          <div class="stat-row"><span class="label">Routing inbound to team (Kylee, Dom, Chris)</span><span class="value">Recurring</span></div>
+          <div class="stat-row"><span class="label">Membership renewal outreach</span><span class="value">Ongoing</span></div>
+          <div class="stat-row"><span class="label">Event RSVP codes &amp; registration confirmations</span><span class="value">Recurring</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">What I field repeatedly</div>
+        <div class="stat-block" style="margin-top:8px;">
+          <div class="stat-row"><span class="label">Member service requests (registration, website, feeds)</span><span class="value">First filter</span></div>
+          <div class="stat-row"><span class="label">Inbound partnership / intro requests</span><span class="value">Ongoing</span></div>
+          <div class="stat-row"><span class="label">Event coordination (Luma registrations, logistics)</span><span class="value amber">Active</span></div>
+          <div class="stat-row"><span class="label">Cold outreach / vendor pitches</span><span class="value">Route or ignore</span></div>
+          <div class="stat-row"><span class="label">Internal asks for member referrals / recommendations</span><span class="value">Connector role</span></div>
+          <div class="stat-row"><span class="label">Top internal senders</span><span class="value">aaron, koriann, domonic, ian</span></div>
+        </div>
+        <div style="margin-top:12px; padding:10px 12px; background:rgba(34,211,238,0.06); border:1px solid rgba(34,211,238,0.2); border-radius:8px; font-size:12px; color:var(--muted); line-height:1.5;">
+          Key pattern: You are frequently the <strong style="color:var(--text);">last stop before something gets done</strong> — member requests land on you, you forward to the right person. That routing is a daily tax on your attention.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--muted);">
+      <strong style="color:var(--text);">Slack:</strong> Not connected — data unavailable. Based on email patterns, internal coordination volume suggests Slack would surface additional reactive time if connected.
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: KEY DIAGNOSTICS ===== -->
+<div class="section">
+  <div class="section-title">Key Diagnostics</div>
+
+  <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">App context switches per day — each represents one app switch in the foreground.</div>
+  <div class="day-grid" style="margin-bottom:20px;">
+    <div class="day-cell med"><div class="dn">Wed</div><div class="dd">Apr 1</div><div class="ds">357</div><div class="dm">6.8h meetings</div></div>
+    <div class="day-cell high"><div class="dn">Thu</div><div class="dd">Apr 2</div><div class="ds">480</div><div class="dm">7.5h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Fri</div><div class="dd">Apr 3</div><div class="ds">295</div><div class="dm">8.8h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Mon</div><div class="dd">Apr 6</div><div class="ds">303</div><div class="dm">9.0h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Tue</div><div class="dd">Apr 7</div><div class="ds">377</div><div class="dm">4.5h meetings</div></div>
+    <div class="day-cell high"><div class="dn">Wed</div><div class="dd">Apr 8</div><div class="ds">465</div><div class="dm">4.2h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Thu</div><div class="dd">Apr 9</div><div class="ds">385</div><div class="dm">4.5h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Fri</div><div class="dd">Apr 10</div><div class="ds">361</div><div class="dm">5.0h meetings</div></div>
+    <div class="day-cell low"><div class="dn">Mon</div><div class="dd">Apr 13</div><div class="ds">255</div><div class="dm">9.5h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Tue</div><div class="dd">Apr 14</div><div class="ds">356</div><div class="dm">6.8h meetings</div></div>
+    <div class="day-cell low"><div class="dn">Wed</div><div class="dd">Apr 15</div><div class="ds">203</div><div class="dm">6.8h meetings</div></div>
+    <div class="day-cell low"><div class="dn">Thu</div><div class="dd">Apr 16</div><div class="ds">202</div><div class="dm">8.8h meetings</div></div>
+    <div class="day-cell low"><div class="dn">Fri</div><div class="dd">Apr 17</div><div class="ds">214</div><div class="dm">9.8h meetings</div></div>
+    <div class="day-cell med"><div class="dn">Mon</div><div class="dd">Apr 20</div><div class="ds">343</div><div class="dm">6.2h meetings</div></div>
+    <div class="day-cell high"><div class="dn">Tue</div><div class="dd">Apr 21</div><div class="ds">614</div><div class="dm">7.5h meetings</div></div>
+  </div>
+  <div style="font-size:12px; color:var(--muted); margin-bottom:28px;">🟢 Under 250 (low) &nbsp;&nbsp; 🟡 250–479 (medium) &nbsp;&nbsp; 🔴 480+ (high)</div>
+
+  <div class="grid-3" style="margin-bottom:28px;">
+    <div class="diagnostic red">
+      <div class="diagnostic-title">Context Switching Rate</div>
+      <div class="diagnostic-value" style="color:#f87171;">347 avg/day</div>
+      <div class="diagnostic-body">At 347 switches over a 10.5-hour day, you change apps every <strong style="color:var(--text);">~1.8 minutes on average</strong>. On Apr 21, it hit 614 — one switch per minute. True deep work requires 20+ uninterrupted minutes. This rate makes that structurally impossible.</div>
+    </div>
+    <div class="diagnostic amber">
+      <div class="diagnostic-title">Meeting Load vs. Deep Work</div>
+      <div class="diagnostic-value" style="color:#fbbf24;">3.4h/day in meetings</div>
+      <div class="diagnostic-body">Real meetings average 3.4h/day, leaving 7.1h theoretically free. But <strong style="color:var(--text);">56 back-to-back pairs</strong> in 15 days eat into the gaps. Combined with the app-switching rate, the "free" hours are actually highly fragmented.</div>
+    </div>
+    <div class="diagnostic cyan">
+      <div class="diagnostic-title">Reactive vs. Proactive Split</div>
+      <div class="diagnostic-value" style="color:#22d3ee;">~65% reactive</div>
+      <div class="diagnostic-body">Routing, fielding inbound, and member service dominate the inbox. Proactive work exists (Kazakhstan, WTC outreach, partnership proposals) but competes with a <strong style="color:var(--text);">constant reactive stream</strong> that lands on you first.</div>
+    </div>
+  </div>
+
+  <div style="font-size:14px; font-weight:600; margin-bottom:14px; color:var(--muted);">Top 3 Time Drains</div>
+  <div class="grid-3">
+    <div class="observation">
+      <div class="obs-title">① LinkedIn — 1,014 work-hours visits</div>
+      <div class="obs-body">At <strong>22% of all work-hours browser activity</strong>, LinkedIn is your #1 browser destination — ahead of HubSpot and calendar combined. Some is legitimate prospect research, but at this volume, a meaningful share is passive browsing. No clear output per visit tracked.</div>
+    </div>
+    <div class="observation">
+      <div class="obs-title">② Manual personalized outreach batches</div>
+      <div class="obs-body">The WTC Utah Summit campaign (<strong>12 individual emails</strong>, same template) and the Kazakhstan invites (<strong>9+ emails</strong>) were sent one-by-one from Superhuman. Each batch likely took 30–45 minutes. High-value activity done at low efficiency — the clearest automation target in the data.</div>
+    </div>
+    <div class="observation">
+      <div class="obs-title">③ First-filter routing tax</div>
+      <div class="obs-body">Member requests (registration issues, website feeds, event logistics) land on you first. You triage and forward to <strong>Kylee, Dom, or Chris</strong> with a quick note. Fast to execute, but the cost is the mental interrupt — and it happens multiple times per day.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: GOAL ALIGNMENT ===== -->
+<div class="section">
+  <div class="section-title">Goal Alignment</div>
+  <div class="grid-2">
+    <div>
+      <div class="goal-row">
+        <div class="goal-header"><span class="goal-name">35% YoY Revenue Growth (top goal)</span><span class="pill amber">Partial alignment</span></div>
+        <div class="bar-track" style="height:10px; margin-bottom:8px;"><div class="bar-fill amber" style="width:40%"></div></div>
+        <div style="font-size:13px; color:var(--muted);">External calls (19.8h), partnership proposals, Kazakhstan delegation, and membership renewal outreach directly tie to revenue. But the routing tax, LinkedIn time, and manual outreach batches are eating the margin between "busy" and "productive toward 35%."</div>
+      </div>
+      <div class="goal-row">
+        <div class="goal-header"><span class="goal-name">Membership structure design</span><span class="pill indigo">Under-represented</span></div>
+        <div class="bar-track" style="height:10px; margin-bottom:8px;"><div class="bar-fill indigo" style="width:20%"></div></div>
+        <div style="font-size:13px; color:var(--muted);">Only one explicit calendar block visible: "Brainstorm New Membership Structure." Given this is a stated priority, it is not showing up as protected deep work time — likely happening in meeting fragments, not dedicated sessions.</div>
+      </div>
+      <div class="goal-row">
+        <div class="goal-header"><span class="goal-name">Member value delivery</span><span class="pill green">Active</span></div>
+        <div class="bar-track" style="height:10px; margin-bottom:8px;"><div class="bar-fill green" style="width:60%"></div></div>
+        <div style="font-size:13px; color:var(--muted);">Event invites, registration support, introductions, and delegation coordination are all member value work — and it's getting done. But largely reactively and manually, with no systematic workflow behind it.</div>
+      </div>
+      <div class="goal-row">
+        <div class="goal-header"><span class="goal-name">Team bandwidth &amp; sales enablement (AI / HubSpot)</span><span class="pill amber">Early stage</span></div>
+        <div class="bar-track" style="height:10px; margin-bottom:8px;"><div class="bar-fill amber" style="width:25%"></div></div>
+        <div style="font-size:13px; color:var(--muted);">HubSpot at 771 work-hours browser visits shows active CRM use. Claude at 2.7h and the "47G Agentic AI and Automation Conversation" calendar block signal investment. But AI is still under 3% of screen time — room to push harder here.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">What should be happening that isn't in the data</div>
+      <div class="stat-block" style="margin-top:8px;">
+        <div class="stat-row"><span class="label">Protected deep work blocks for membership design</span><span class="value amber">Missing</span></div>
+        <div class="stat-row"><span class="label">Systematic renewal pipeline (not ad-hoc emails)</span><span class="value amber">Missing</span></div>
+        <div class="stat-row"><span class="label">Post-meeting partnership plan automation</span><span class="value amber">Missing</span></div>
+        <div class="stat-row"><span class="label">Inbound triage handled before it reaches you</span><span class="value red">Missing</span></div>
+        <div class="stat-row"><span class="label">LinkedIn research replaced by AI pre-meeting briefs</span><span class="value red">Missing</span></div>
+        <div class="stat-row"><span class="label">Mass outreach via mail merge, not 1-by-1</span><span class="value red">Missing</span></div>
+      </div>
+      <div style="margin-top:16px; padding:12px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:8px; font-size:13px; color:var(--muted); line-height:1.5;">
+        <strong style="color:var(--text);">The core gap:</strong> The work eating your time (routing, manual outreach, LinkedIn research) is not what drives 35% revenue growth. The work that does drive it (partnerships, membership design, sales enablement) is getting squeezed into the margins.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: AUTOMATION OPPORTUNITIES ===== -->
+<div class="section">
+  <div class="section-title">Automation Opportunities — Draft</div>
+  <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">Ranked by: (hours reclaimed) × (direct tie to 35% revenue growth). All estimates are drafts.</div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#1 · Quick Win</div>
+        <div class="automation-outcome">Member event invites go out to 20 people in 2 minutes, not 45 minutes of copy-paste.</div>
+      </div>
+      <div><div class="hours-badge">~2h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">You send the same templated email (WTC Utah Summit, Kazakhstan delegation) to 10–15 individual members one-by-one in Superhuman with minor first-name personalization. Each batch takes ~30–45 minutes. This happened twice in the last two days alone.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">You write the template once. AI pulls each recipient's first name and a relevant detail from HubSpot. You approve the batch. One click sends all 15. Trigger: any member outreach campaign. Output: sent emails with logging back to HubSpot contact records.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge quick">Quick Win · Under 2h</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#2 · Quick Win</div>
+        <div class="automation-outcome">Partnership plans write themselves — a draft lands in your inbox within 1 hour of an external call ending.</div>
+      </div>
+      <div><div class="hours-badge">~1.5h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">You manually draft partnership plans after external calls (Solve Technology plan sent Apr 8; calendar shows 20+ external calls this period). High-value output, high-effort to produce — requires a dedicated drafting session per partner.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">Trigger: paste meeting notes (or a voice memo transcript) into Claude Code after any external call. AI pulls the company's HubSpot record + LinkedIn profile, then outputs a structured partnership plan in your established format. You edit and send — no blank page.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge quick">Quick Win · Under 2h</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#3 · Medium Lift</div>
+        <div class="automation-outcome">Pre-meeting briefs arrive 15 minutes before every external call — no manual LinkedIn research required.</div>
+      </div>
+      <div><div class="hours-badge">~2.5h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">1,014 LinkedIn visits in 14 work-days suggests heavy pre-meeting and ambient research. With 20+ external calls per period, each call likely involves 10–15 minutes of manual LinkedIn + email history gathering scattered throughout the day.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">Trigger: Google Calendar event starts in 20 minutes with external attendees. AI scrapes LinkedIn profiles, pulls HubSpot history, surfaces past email threads, and emails you a one-pager: who they are, why they're meeting you, what to watch for, suggested talking points. You arrive prepped.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge medium">Medium Lift · Half day</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#4 · Medium Lift</div>
+        <div class="automation-outcome">Membership renewals run on a system — every member gets a touchpoint at the right time, not when you remember.</div>
+      </div>
+      <div><div class="hours-badge">~1h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">Renewal outreach is ad-hoc (visible: Nariman / Nesheworks renewal email). With member value delivery as a stated priority, the pipeline should be systematic — but it's showing up as individual one-off emails triggered by memory or HubSpot reminders.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">HubSpot tracks membership anniversary dates. At 60 days out, AI drafts a personalized renewal email (pulling engagement history, events attended, introductions made) and queues it for your approval. At 30 days, a follow-up is queued if no response. You review and send in one click each time.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge medium">Medium Lift · Half day</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#5 · Medium Lift</div>
+        <div class="automation-outcome">Common member requests get triaged and routed before they reach you.</div>
+      </div>
+      <div><div class="hours-badge">~1.5h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">You receive member service inbound (registration pricing issue, website feed question, event logistics) and manually forward to Kylee, Dom, or Chris with a quick note. Fast but constant — each forward is a context switch and a mental interrupt on top of your real work.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">Superhuman auto-labels inbound by type (event support, member service, partnership inquiry, cold outreach). A rule auto-drafts a forward to the right person for "event support" and "member service" threads — you just approve. Cold outreach auto-archives or routes to a weekly digest you batch-process in 10 minutes.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge medium">Medium Lift · Half day</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+
+  <div class="automation-card">
+    <div class="automation-header">
+      <div>
+        <div class="automation-rank">#6 · Big Build</div>
+        <div class="automation-outcome">Contact intelligence arrives automatically — you stop opening LinkedIn to research and start using that time for outreach.</div>
+      </div>
+      <div><div class="hours-badge">~3h/week reclaimed</div></div>
+    </div>
+    <div><div class="field-label">What's happening today</div><div class="field-body">1,014 LinkedIn visits across 14 weekdays points to ambient research that happens throughout the day — not just before meetings. Every new email thread, every new contact, every interesting company triggers a manual tab open and a manual read.</div></div>
+    <div><div class="field-label">What the automated version looks like</div><div class="field-body">Every new contact added to HubSpot (or reply-to from a new domain) triggers an AI enrichment job: LinkedIn profile pull, company background, Utah / aerospace / defense relevance score, mutual connections. Delivers a brief to HubSpot notes and your inbox. You stop opening LinkedIn except to post.</div></div>
+    <div class="automation-footer">
+      <div style="display:flex; gap:8px; align-items:center;"><span class="effort-badge big">Big Build · Multi-session</span><span style="font-size:11px; color:var(--muted); font-style:italic;">draft estimate</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: DATA SOURCES ===== -->
+<div class="section">
+  <div class="section-title">Data Sources</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Source</th><th>Status</th><th>Date Range</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Mac App Usage (Screen Time · knowledgeC.db)</td><td><span class="pill green">Connected</span></td><td>Mar 24 – Apr 21, 2026</td><td>10,352 records; filtered to weekdays 8am–6:30pm. Bundle IDs resolved to readable names.</td></tr>
+        <tr><td>Arc Browser History (Profile 1 — work)</td><td><span class="pill green">Connected</span></td><td>Apr 1–21, 2026 (14 weekdays)</td><td>4,601 filtered visits. Profile 1 confirmed as work profile (HubSpot, Google Workspace dominant). Default profile was personal (YouTube, financial sites) and excluded.</td></tr>
+        <tr><td>Google Calendar (gerritt@47g.org)</td><td><span class="pill green">Connected</span></td><td>Apr 1–21, 2026</td><td>133 events; 130 included after filtering declined and all-day events. Categorized into focus blocks, external calls, 1:1s, and team meetings.</td></tr>
+        <tr><td>Email (gerritt@47g.org via Gmail MCP)</td><td><span class="pill green">Connected</span></td><td>Mar 22 – Apr 21, 2026</td><td>50 sent + 50 received threads analyzed. Patterns identified from subject lines, senders, recipients, and message snippets.</td></tr>
+        <tr><td>Slack</td><td><span class="pill red">Not connected</span></td><td>—</td><td>No Slack MCP connector. Add at claude.ai → Settings → Connectors to include in future audits.</td></tr>
+        <tr><td>HubSpot</td><td><span class="pill indigo">Available · not pulled</span></td><td>—</td><td>MCP connected but pipeline/deal data not queried for this audit. Recommend adding in next version for revenue-alignment scoring.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <span>Time Audit — April 21, 2026 | Part of my AI Builder Automation Portfolio</span>
+  <span>Gerritt Vander Linden · VP, Commercial Partnerships &amp; Growth · 47G</span>
+</div>
+
+</body>
+</html>
