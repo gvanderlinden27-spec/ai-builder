@@ -1,5 +1,7 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/ai-builder-dashboard.html" }
+  "routes": [
+    { "src": "/api/roadmap", "dest": "/api/roadmap.js" },
+    { "src": "/", "dest": "/ai-builder-dashboard.html" },
+    { "src": "/(.*\\.html)", "dest": "/$1" }
   ]
 }
