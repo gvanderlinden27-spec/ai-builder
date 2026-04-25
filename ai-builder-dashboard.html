@@ -42,6 +42,36 @@
   .header-left .meta { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); margin-top: 4px; }
   .header-right { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); }
 
+  /* ── Stats bar ── */
+  .stats-bar {
+    background: var(--black);
+    border-top: 1px solid rgba(246,245,239,0.08);
+    padding: 0 48px 20px;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--sand);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+  .stat-value.active  { color: #f0c060; }
+  .stat-value.reclaimed { color: #6fcf97; }
+
   /* ── Board ── */
   .board-wrapper { padding: 40px 32px 60px; overflow-x: auto; }
   .board {
@@ -69,6 +99,27 @@
   .column.suggested .column-cards .card { background: #E4E3DC; border-color: rgba(0,0,0,0.1); }
   .column.suggested .column-cards .card .card-name { color: var(--grey); }
   .column.suggested .column-cards .card .card-desc { color: rgba(125,125,125,0.8); }
+
+  /* Add idea button */
+  .add-idea-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: transparent;
+    border: 1px dashed rgba(0,0,0,0.2);
+    color: var(--grey);
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    text-align: left;
+  }
+  .add-idea-btn:hover { border-color: rgba(0,0,0,0.4); color: var(--black); }
 
   .column-cards {
     display: flex; flex-direction: column; gap: 10px;
@@ -148,7 +199,7 @@
   }
   #drag-ghost.visible { opacity: 1; }
 
-  /* ── Modal ── */
+  /* ── Modal (shared: edit + add) ── */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -175,15 +226,16 @@
   }
 
   .modal-close {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none; border: none;
-    font-size: 18px; cursor: pointer;
-    color: var(--grey); line-height: 1;
-    padding: 4px;
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; font-size: 18px; cursor: pointer;
+    color: var(--grey); line-height: 1; padding: 4px;
   }
   .modal-close:hover { color: var(--black); }
 
+  .modal-heading {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--grey); margin-bottom: 6px;
+  }
   .modal-card-name {
     font-size: 18px; font-weight: 400; line-height: 1.3;
     margin-bottom: 24px; padding-right: 24px;
@@ -195,9 +247,16 @@
     display: block; margin-bottom: 8px;
   }
 
-  .priority-selector {
-    display: flex; gap: 8px; margin-bottom: 24px;
+  .modal-input {
+    width: 100%; padding: 10px 12px;
+    font-family: var(--font); font-size: 14px; line-height: 1.4;
+    background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.15);
+    color: var(--black); outline: none; margin-bottom: 16px;
   }
+  .modal-input:focus { border-color: rgba(0,0,0,0.35); }
+  .modal-input::placeholder { color: rgba(125,125,125,0.5); }
+
+  .priority-selector { display: flex; gap: 8px; margin-bottom: 24px; }
   .priority-btn {
     flex: 1; padding: 7px 0; font-family: var(--font);
     font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
@@ -213,20 +272,17 @@
   .priority-btn.low.selected    { background: rgba(125,125,125,0.1); }
 
   .notes-textarea {
-    width: 100%; min-height: 100px;
+    width: 100%; min-height: 90px;
     padding: 10px 12px;
     font-family: var(--font); font-size: 13px; line-height: 1.6;
-    background: rgba(0,0,0,0.03);
-    border: 1px solid rgba(0,0,0,0.15);
-    color: var(--black);
-    resize: vertical;
-    outline: none;
-    margin-bottom: 24px;
+    background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.15);
+    color: var(--black); resize: vertical; outline: none; margin-bottom: 24px;
   }
   .notes-textarea:focus { border-color: rgba(0,0,0,0.35); }
   .notes-textarea::placeholder { color: rgba(125,125,125,0.5); }
 
-  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-actions { display: flex; justify-content: space-between; align-items: center; }
+  .modal-actions-right { display: flex; gap: 10px; }
   .btn {
     font-family: var(--font); font-size: 11px; font-weight: 500;
     letter-spacing: 0.1em; text-transform: uppercase;
@@ -236,6 +292,9 @@
   .btn-cancel:hover { border-color: rgba(0,0,0,0.4); color: var(--black); }
   .btn-save { background: var(--black); border-color: var(--black); color: var(--sand); }
   .btn-save:hover { background: #222; }
+  .btn-delete { background: transparent; border-color: transparent; color: rgba(192,57,43,0.6); font-size: 10px; padding: 9px 0; }
+  .btn-delete:hover { color: var(--p-high); }
+  .btn-delete.hidden { visibility: hidden; }
 
   /* ── Empty state ── */
   .empty-state {
@@ -261,6 +320,21 @@
   <div class="header-right">47G.ORG ↗</div>
 </header>
 
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value" id="stat-potential">0h</div>
+    <div class="stat-label">/ week potential</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value active" id="stat-active">0h</div>
+    <div class="stat-label">/ week in flight</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value reclaimed" id="stat-reclaimed">0h</div>
+    <div class="stat-label">/ week reclaimed</div>
+  </div>
+</div>
+
 <div class="board-wrapper">
   <div class="board">
     <div class="column suggested" id="col-suggested">
@@ -269,6 +343,7 @@
         <span class="col-count" id="count-suggested">0</span>
       </div>
       <div class="column-cards" id="cards-suggested" data-col="suggested"></div>
+      <button class="add-idea-btn" id="add-idea-btn">+ Add idea</button>
     </div>
     <div class="column" id="col-to-build">
       <div class="column-header">
@@ -297,11 +372,21 @@
 <!-- Ghost -->
 <div id="drag-ghost"></div>
 
-<!-- Edit Modal -->
+<!-- Edit / Add Modal -->
 <div class="modal-overlay" id="modal-overlay">
-  <div class="modal" id="modal">
+  <div class="modal">
     <button class="modal-close" id="modal-close">×</button>
-    <div class="modal-card-name" id="modal-name"></div>
+    <div class="modal-heading" id="modal-heading">Edit card</div>
+
+    <!-- Static name (edit mode) -->
+    <div class="modal-card-name" id="modal-name-display"></div>
+
+    <!-- Editable name (add mode) -->
+    <input class="modal-input" id="modal-name-input" type="text" placeholder="Automation name..." style="display:none">
+
+    <!-- Editable desc (add mode) -->
+    <label class="modal-label" id="modal-desc-label" style="display:none">Description</label>
+    <input class="modal-input" id="modal-desc-input" type="text" placeholder="One-line description..." style="display:none">
 
     <label class="modal-label">Priority</label>
     <div class="priority-selector">
@@ -314,8 +399,11 @@
     <textarea class="notes-textarea" id="modal-notes" placeholder="Add notes..."></textarea>
 
     <div class="modal-actions">
-      <button class="btn btn-cancel" id="modal-cancel">Cancel</button>
-      <button class="btn btn-save"   id="modal-save">Save →</button>
+      <button class="btn btn-delete" id="modal-delete">Delete card</button>
+      <div class="modal-actions-right">
+        <button class="btn btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn btn-save"   id="modal-save">Save →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -326,54 +414,126 @@
 </footer>
 
 <script>
-  // ── State ────────────────────────────────────────────────────────────────
+  // ── Default automations ──────────────────────────────────────────────────
+
+  const DEFAULTS = [
+    { id: "auto-1", rank: "#1 · Quick Win",   name: "Partnership Plan Generator",      desc: "Draft lands in inbox within 1 hour of any external call ending.",            priority: "high",   hours: 1.5, col: "to-build" },
+    { id: "auto-2", rank: "#2 · Quick Win",   name: "Batch Member Outreach",           desc: "Send personalized invites to 20 members in 2 minutes, not 45.",              priority: "high",   hours: 2,   col: "to-build" },
+    { id: "auto-3", rank: "#3 · Medium Lift", name: "Pre-Meeting Brief",               desc: "One-pager arrives 15 min before every external call — no LinkedIn required.", priority: "high",   hours: 2.5, col: "to-build" },
+    { id: "auto-4", rank: "#4 · Medium Lift", name: "Membership Renewal Pipeline",     desc: "Personalized renewal emails queued automatically at 60 and 30 days out.",     priority: "medium", hours: 1,   col: "to-build" },
+    { id: "auto-5", rank: "#5 · Medium Lift", name: "Inbound Triage & Routing",        desc: "Member requests auto-labeled and forwarded before they reach you.",           priority: "medium", hours: 1.5, col: "to-build" },
+    { id: "auto-6", rank: "#6 · Big Build",   name: "Contact Intelligence Enrichment", desc: "Every new HubSpot contact auto-enriched with relevance score and brief.",     priority: "low",    hours: 3,   col: "to-build" },
+  ];
+
+  const COL_ORDER       = ["suggested", "to-build", "in-progress", "done"];
+  const STORAGE_KEY     = "47g-kanban-v4";
+  const CLICK_THRESHOLD = 5;
+
+  // ── State — declared before render() ────────────────────────────────────
 
   let cards         = [];
   let dragState     = null;
   let modalCardId   = null;
   let modalPriority = null;
+  let modalMode     = "edit"; // "edit" | "add"
 
-  const COL_ORDER       = ["suggested", "to-build", "in-progress", "done"];
-  const CLICK_THRESHOLD = 5;
+  // ── Persistence ──────────────────────────────────────────────────────────
 
-  // ── API ──────────────────────────────────────────────────────────────────
-
-  async function loadCards() {
-    const res = await fetch('/api/roadmap');
-    cards = await res.json();
-    render();
+  function persist() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
   }
 
-  async function patchStatus(id, col) {
-    await fetch('/api/roadmap', {
-      method:  'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ id, col }),
+  function loadCards() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        // Merge: update defaults with saved state; keep any user-added cards
+        const savedMap = {};
+        saved.forEach(c => { savedMap[c.id] = c; });
+        cards = DEFAULTS.map(d => Object.assign({}, d, savedMap[d.id] || {}));
+        // Append user-created cards not in DEFAULTS
+        const defaultIds = new Set(DEFAULTS.map(d => d.id));
+        saved.forEach(c => { if (!defaultIds.has(c.id)) cards.push(c); });
+      } else {
+        cards = DEFAULTS.map(d => Object.assign({}, d));
+      }
+    } catch {
+      cards = DEFAULTS.map(d => Object.assign({}, d));
+    }
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+
+  function fmt(h) {
+    return Number.isInteger(h) ? h + "h" : h + "h";
+  }
+
+  function updateStats() {
+    let potential = 0, active = 0, reclaimed = 0;
+    cards.forEach(c => {
+      const h = c.hours || 0;
+      if (c.col === "to-build" || c.col === "in-progress" || c.col === "done") potential += h;
+      if (c.col === "in-progress") active    += h;
+      if (c.col === "done")        reclaimed += h;
     });
+    document.getElementById("stat-potential").textContent  = fmt(potential);
+    document.getElementById("stat-active").textContent     = fmt(active);
+    document.getElementById("stat-reclaimed").textContent  = fmt(reclaimed);
   }
 
   // ── Modal ─────────────────────────────────────────────────────────────────
 
-  const overlay      = document.getElementById("modal-overlay");
-  const modalName    = document.getElementById("modal-name");
-  const modalNotes   = document.getElementById("modal-notes");
-  const priorityBtns = document.querySelectorAll(".priority-btn");
+  const overlay       = document.getElementById("modal-overlay");
+  const modalHeading  = document.getElementById("modal-heading");
+  const modalNameDisp = document.getElementById("modal-name-display");
+  const modalNameInp  = document.getElementById("modal-name-input");
+  const modalDescLbl  = document.getElementById("modal-desc-label");
+  const modalDescInp  = document.getElementById("modal-desc-input");
+  const modalNotes    = document.getElementById("modal-notes");
+  const modalDelete   = document.getElementById("modal-delete");
+  const priorityBtns  = document.querySelectorAll(".priority-btn");
 
-  function openModal(id) {
+  function setPriority(p) {
+    modalPriority = p;
+    priorityBtns.forEach(b => b.classList.toggle("selected", b.dataset.p === p));
+  }
+
+  function openEditModal(id) {
     const card = cards.find(c => c.id === id);
     if (!card) return;
+    modalMode     = "edit";
     modalCardId   = id;
-    modalPriority = card.priority;
 
-    modalName.textContent = card.name;
-    modalNotes.value      = card.notes || '';
-
-    priorityBtns.forEach(btn => {
-      btn.classList.toggle("selected", btn.dataset.p === card.priority);
-    });
-
+    modalHeading.textContent    = "Edit card";
+    modalNameDisp.textContent   = card.name;
+    modalNameDisp.style.display = "";
+    modalNameInp.style.display  = "none";
+    modalDescLbl.style.display  = "none";
+    modalDescInp.style.display  = "none";
+    modalNotes.value            = card.notes || "";
+    modalDelete.className       = card.rank ? "btn btn-delete hidden" : "btn btn-delete"; // hide delete for built-ins
+    setPriority(card.priority);
     overlay.classList.add("open");
     modalNotes.focus();
+  }
+
+  function openAddModal() {
+    modalMode   = "add";
+    modalCardId = null;
+
+    modalHeading.textContent    = "Add idea";
+    modalNameDisp.style.display = "none";
+    modalNameInp.style.display  = "";
+    modalNameInp.value          = "";
+    modalDescLbl.style.display  = "";
+    modalDescInp.style.display  = "";
+    modalDescInp.value          = "";
+    modalNotes.value            = "";
+    modalDelete.className       = "btn btn-delete hidden";
+    setPriority("medium");
+    overlay.classList.add("open");
+    modalNameInp.focus();
   }
 
   function closeModal() {
@@ -382,28 +542,51 @@
   }
 
   function saveModal() {
-    if (!modalCardId) return;
-    const card = cards.find(c => c.id === modalCardId);
-    if (card) {
+    if (modalMode === "edit") {
+      const card = cards.find(c => c.id === modalCardId);
+      if (!card) return;
       card.priority = modalPriority;
       card.notes    = modalNotes.value.trim();
+    } else {
+      const name = modalNameInp.value.trim();
+      if (!name) { modalNameInp.focus(); return; }
+      cards.push({
+        id:       "user-" + Date.now(),
+        name,
+        desc:     modalDescInp.value.trim(),
+        priority: modalPriority,
+        notes:    modalNotes.value.trim(),
+        col:      "suggested",
+        hours:    0,
+      });
     }
+    persist();
     closeModal();
     render();
   }
 
-  priorityBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      modalPriority = btn.dataset.p;
-      priorityBtns.forEach(b => b.classList.toggle("selected", b === btn));
-    });
-  });
+  function deleteCard() {
+    if (!modalCardId) return;
+    cards = cards.filter(c => c.id !== modalCardId);
+    persist();
+    closeModal();
+    render();
+  }
 
+  priorityBtns.forEach(btn => btn.addEventListener("click", () => setPriority(btn.dataset.p)));
   document.getElementById("modal-save").addEventListener("click", saveModal);
   document.getElementById("modal-cancel").addEventListener("click", closeModal);
   document.getElementById("modal-close").addEventListener("click", closeModal);
+  document.getElementById("modal-delete").addEventListener("click", deleteCard);
   overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("open")) closeModal(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+    if ((e.key === "Enter") && overlay.classList.contains("open") && e.target !== modalNotes) {
+      e.preventDefault();
+      saveModal();
+    }
+  });
+  document.getElementById("add-idea-btn").addEventListener("click", openAddModal);
 
   // ── Ghost ─────────────────────────────────────────────────────────────────
 
@@ -415,7 +598,7 @@
         <div class="card-name">${card.name}</div>
         <div class="priority-badge ${card.priority}">${card.priority}</div>
       </div>
-      <div class="card-desc">${card.desc}</div>
+      <div class="card-desc">${card.desc || ''}</div>
     `;
   }
 
@@ -471,12 +654,8 @@
 
     const zone = zoneFromPoint(e.clientX, e.clientY);
     document.querySelectorAll(".column-cards").forEach(z => z.classList.remove("drag-over"));
-    if (zone) {
-      zone.classList.add("drag-over");
-      insertPlaceholderInto(zone);
-    } else {
-      removePlaceholder();
-    }
+    if (zone) { zone.classList.add("drag-over"); insertPlaceholderInto(zone); }
+    else       { removePlaceholder(); }
   }
 
   function onPointerUp(e) {
@@ -491,7 +670,7 @@
       dragState.sourceEl.classList.remove("is-source");
       const id = dragState.id;
       dragState = null;
-      openModal(id);
+      openEditModal(id);
       return;
     }
 
@@ -499,23 +678,16 @@
     removePlaceholder();
     dragState.sourceEl.classList.remove("is-source");
 
-    const targetCol = zone ? zone.dataset.col : null;
-    const { id, sourceCol } = dragState;
-    dragState = null;
-
-    if (targetCol && targetCol !== sourceCol) {
-      const card = cards.find(c => c.id === id);
-      if (card) {
-        card.col = targetCol;
-        render();
-        patchStatus(id, targetCol).catch(() => {
-          card.col = sourceCol;
-          render();
-        });
+    if (zone) {
+      const targetCol = zone.dataset.col;
+      if (targetCol) {
+        const card = cards.find(c => c.id === dragState.id);
+        if (card) { card.col = targetCol; persist(); }
       }
-    } else {
-      render();
     }
+
+    dragState = null;
+    render();
   }
 
   function onPointerDown(e) {
@@ -528,7 +700,7 @@
 
     e.preventDefault();
     dragState = {
-      id:        cardEl.dataset.id,
+      id:       cardEl.dataset.id,
       sourceCol: zone.dataset.col,
       sourceEl:  cardEl,
       startX:    e.clientX,
@@ -538,20 +710,20 @@
     };
 
     document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointerup",   onPointerUp);
   }
 
   // ── Render ───────────────────────────────────────────────────────────────
 
   function updateCounts() {
     COL_ORDER.forEach(col => {
-      const cardEls = document.querySelectorAll(`[data-col="${col}"] .card`);
+      const cardEls  = document.querySelectorAll(`[data-col="${col}"] .card`);
       document.getElementById(`count-${col}`).textContent = cardEls.length;
-      const zone    = document.getElementById(`cards-${col}`);
+      const zone     = document.getElementById(`cards-${col}`);
       const existing = zone.querySelector(".empty-state");
       if (cardEls.length === 0 && !existing) {
         const em = document.createElement("div");
-        em.className = "empty-state";
+        em.className   = "empty-state";
         em.textContent = col === "suggested" ? "Ideas from others will appear here" : "—";
         zone.appendChild(em);
       } else if (cardEls.length > 0 && existing) {
@@ -560,7 +732,7 @@
     });
   }
 
-  function createCard(card) {
+  function createCardEl(card) {
     const el = document.createElement("div");
     el.className  = "card";
     el.dataset.id = card.id;
@@ -569,9 +741,9 @@
         <div class="card-name">${card.name}</div>
         <div class="priority-badge ${card.priority}">${card.priority}</div>
       </div>
-      <div class="card-desc">${card.desc}</div>
+      <div class="card-desc">${card.desc || ''}</div>
       <div class="card-footer">
-        <div class="card-rank">${card.submittedBy || ''}</div>
+        <div class="card-rank">${card.rank || ''}</div>
         ${card.notes ? '<div class="card-notes-indicator">[notes]</div>' : ''}
       </div>
     `;
@@ -582,6 +754,7 @@
     const zones = {};
     COL_ORDER.forEach(col => { zones[col] = document.getElementById(`cards-${col}`); });
 
+    // FLIP snapshots
     const snapshots = {};
     document.querySelectorAll(".card").forEach(c => {
       const r = c.getBoundingClientRect();
@@ -591,16 +764,17 @@
     Object.values(zones).forEach(z => z.innerHTML = "");
 
     cards.forEach(card => {
-      const col = COL_ORDER.includes(card.col) ? card.col : 'suggested';
-      zones[col].appendChild(createCard(card));
+      const col = COL_ORDER.includes(card.col) ? card.col : "suggested";
+      zones[col].appendChild(createCardEl(card));
     });
 
+    // FLIP animate
     cards.forEach(card => {
       const el = document.querySelector(`.card[data-id="${card.id}"]`);
       if (!el) return;
-      const newRect = el.getBoundingClientRect();
       const old = snapshots[card.id];
       if (!old) return;
+      const newRect = el.getBoundingClientRect();
       const dy = old.top  - newRect.top;
       const dx = old.left - newRect.left;
       if (Math.abs(dy) < 2 && Math.abs(dx) < 2) return;
@@ -608,7 +782,6 @@
       el.style.transition = "none";
       el.style.transform  = `translate(${dx}px, ${dy}px)`;
       el.style.boxShadow  = Math.abs(dx) > 10 ? "0 8px 24px rgba(0,0,0,0.16)" : "";
-
       requestAnimationFrame(() => {
         el.style.transition = "transform 0.38s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s cubic-bezier(0.34,1.56,0.64,1)";
         el.style.transform  = "translate(0,0)";
@@ -617,11 +790,13 @@
     });
 
     updateCounts();
+    updateStats();
   }
 
   document.querySelector(".board").addEventListener("pointerdown", onPointerDown);
 
   loadCards();
+  render();
 </script>
 </body>
 </html>
