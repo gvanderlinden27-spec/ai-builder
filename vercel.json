@@ -7,7 +7,7 @@
   "routes": [
     { "src": "/api/roadmap", "dest": "/api/roadmap.js" },
     { "src": "/suggest", "dest": "/suggest.html" },
-    { "src": "/", "dest": "/ai-builder-dashboard.html" },
+    { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
