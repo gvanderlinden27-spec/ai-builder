@@ -8,12 +8,14 @@ const STATUS_TO_COL = {
   'To Build':    'to-build',
   'In Progress': 'in-progress',
   'Done':        'done',
+  'Archived':    'archived',
 };
 const COL_TO_STATUS = {
   'suggested':   'Suggested',
   'to-build':    'To Build',
   'in-progress': 'In Progress',
   'done':        'Done',
+  'archived':    'Archived',
 };
 const PRIORITY_IN  = { 'High': 'high', 'Medium': 'medium', 'Low': 'low' };
 const PRIORITY_OUT = { 'high': 'High', 'medium': 'Medium', 'low': 'Low' };
