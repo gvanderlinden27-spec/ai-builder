@@ -51,14 +51,15 @@ module.exports = async (req, res) => {
 
     // ── PATCH: update any combination of fields ─────────────────────────────
     if (req.method === 'PATCH') {
-      const { id, col, priority, hours, notes } = req.body;
+      const { id, col, priority, hours, notes, submittedBy } = req.body;
       if (!id) return res.status(400).json({ error: 'Missing id' });
 
       const properties = {};
-      if (col      !== undefined) properties.Status             = { select: { name: COL_TO_STATUS[col] } };
-      if (priority !== undefined) properties.Priority           = { select: { name: PRIORITY_OUT[priority] } };
-      if (hours    !== undefined) properties['Hours per Week']  = { number: hours };
-      if (notes    !== undefined) properties.Notes              = rt(notes);
+      if (col         !== undefined) properties.Status            = { select: { name: COL_TO_STATUS[col] } };
+      if (priority    !== undefined) properties.Priority          = { select: { name: PRIORITY_OUT[priority] } };
+      if (hours       !== undefined) properties['Hours per Week'] = { number: hours };
+      if (notes       !== undefined) properties.Notes             = rt(notes);
+      if (submittedBy !== undefined) properties['Submitted by']   = rt(submittedBy);
 
       await notion.pages.update({ page_id: id, properties });
       return res.json({ ok: true });
