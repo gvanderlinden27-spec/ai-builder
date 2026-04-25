@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Builder — 47G</title>
+<style>
+  :root {
+    --black: #000000;
+    --sand:  #F6F5EF;
+    --grey:  #7D7D7D;
+    --font:  'ABC Diatype', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--sand);
+    color: var(--black);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--black);
+    color: var(--sand);
+    padding: 40px 48px;
+    border-bottom: 1px solid rgba(246,245,239,0.1);
+  }
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--sand);
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--grey);
+    margin-top: 10px;
+    letter-spacing: 0.04em;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .goal-badge {
+    border: 1px solid rgba(246,245,239,0.2);
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sand);
+    white-space: nowrap;
+  }
+  .header-meta {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    padding: 64px 48px 80px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 32px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+  }
+
+  /* ── Nav cards ── */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid rgba(0,0,0,0.12);
+    margin-bottom: 64px;
+  }
+
+  .nav-card {
+    display: block;
+    padding: 36px 32px;
+    border-right: 1px solid rgba(0,0,0,0.12);
+    text-decoration: none;
+    color: var(--black);
+    transition: background 0.15s;
+    position: relative;
+  }
+  .nav-card:last-child { border-right: none; }
+  .nav-card:hover { background: rgba(0,0,0,0.03); }
+
+  .nav-card-num {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 16px;
+  }
+  .nav-card-title {
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--black);
+    margin-bottom: 12px;
+  }
+  .nav-card-desc {
+    font-size: 13px;
+    color: var(--grey);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .nav-card-arrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--black);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    padding-bottom: 1px;
+    display: inline-block;
+    transition: border-color 0.12s;
+  }
+  .nav-card:hover .nav-card-arrow { border-color: var(--black); }
+
+  /* ── Sprint status strip ── */
+  .sprint-strip {
+    border: 1px solid rgba(0,0,0,0.12);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+  }
+  .sprint-item {
+    padding: 20px 20px 18px;
+    border-right: 1px solid rgba(0,0,0,0.12);
+    opacity: 0.35;
+  }
+  .sprint-item:last-child { border-right: none; }
+  .sprint-item.done    { opacity: 0.6; }
+  .sprint-item.current { opacity: 1; background: var(--black); color: var(--sand); }
+
+  .sprint-num {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 6px;
+  }
+  .sprint-item.current .sprint-num { color: rgba(246,245,239,0.45); }
+
+  .sprint-name {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: inherit;
+  }
+
+  .sprint-status {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+  .sprint-item.current .sprint-status {
+    color: rgba(246,245,239,0.45);
+    border-top-color: rgba(246,245,239,0.1);
+  }
+  .sprint-item.done .sprint-status { color: var(--black); border-top-color: rgba(0,0,0,0.12); }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  @media (max-width: 900px) {
+    header, main, footer { padding: 24px; }
+    .nav-grid, .sprint-strip { grid-template-columns: 1fr; }
+    .nav-card, .sprint-item { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.12); }
+    .nav-card:last-child, .sprint-item:last-child { border-bottom: none; }
+    .header-right { align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="header-eyebrow">47G · Gerritt Vander Linden</div>
+      <div class="header-title">AI Builder</div>
+      <div class="header-sub">Automation portfolio for 47G — tracking time reclaimed, automations built, and the roadmap to 35% YoY revenue growth.</div>
+    </div>
+    <div class="header-right">
+      <div class="goal-badge">#1 Goal — 35% YoY Revenue Growth</div>
+      <div class="header-meta">Sprint 2 · April 2026</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="section-label">[1] Pages</div>
+
+  <div class="nav-grid">
+
+    <a class="nav-card" href="/ai-builder-plan.html">
+      <div class="nav-card-num">Plan</div>
+      <div class="nav-card-title">AI Builder Plan</div>
+      <div class="nav-card-desc">Time audit findings, 6 automation briefs sorted by impact, Sprint 2 deliverables, and the full sprint roadmap.</div>
+      <span class="nav-card-arrow">Open Plan →</span>
+    </a>
+
+    <a class="nav-card" href="/ai-builder-dashboard.html">
+      <div class="nav-card-num">Live</div>
+      <div class="nav-card-title">Automation Dashboard</div>
+      <div class="nav-card-desc">Kanban board wired live to Notion. Drag cards between columns to update status. Add new automation ideas directly.</div>
+      <span class="nav-card-arrow">Open Dashboard →</span>
+    </a>
+
+    <a class="nav-card" href="/time-audit.html">
+      <div class="nav-card-num">Data</div>
+      <div class="nav-card-title">Time Audit</div>
+      <div class="nav-card-desc">14-day time analysis across Superhuman, LinkedIn, HubSpot, and Google Calendar. Source data for the automation priorities.</div>
+      <span class="nav-card-arrow">Open Audit →</span>
+    </a>
+
+  </div>
+
+  <div class="section-label">[2] Sprint Progress</div>
+
+  <div class="sprint-strip">
+    <div class="sprint-item done">
+      <div class="sprint-num">S1</div>
+      <div class="sprint-name">Time Audit + AI Builder Plan</div>
+      <div class="sprint-status">Complete</div>
+    </div>
+    <div class="sprint-item current">
+      <div class="sprint-num">S2 · Now</div>
+      <div class="sprint-name">Deployed website + data collection</div>
+      <div class="sprint-status">In progress</div>
+    </div>
+    <div class="sprint-item">
+      <div class="sprint-num">S3</div>
+      <div class="sprint-name">Automated n8n or Claude Routines workflow</div>
+      <div class="sprint-status">Up next</div>
+    </div>
+    <div class="sprint-item">
+      <div class="sprint-num">S4</div>
+      <div class="sprint-name">Knowledge wiki context system</div>
+      <div class="sprint-status">Coming</div>
+    </div>
+    <div class="sprint-item">
+      <div class="sprint-num">S5</div>
+      <div class="sprint-name">Custom agentic workflow</div>
+      <div class="sprint-status">Coming</div>
+    </div>
+    <div class="sprint-item">
+      <div class="sprint-num">S6</div>
+      <div class="sprint-name">Eval system (tested + documented)</div>
+      <div class="sprint-status">Coming</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>AI Builder — April 2026 · Sprint 2</span>
+  <span>Gerritt Vander Linden · 47G</span>
+</footer>
+
+</body>
+</html>
