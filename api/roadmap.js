@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
 
     // ── POST: create a new card ─────────────────────────────────────────────
     if (req.method === 'POST') {
-      const { name, desc, priority, hours, notes } = req.body;
+      const { name, desc, priority, hours, notes, submittedBy } = req.body;
       if (!name) return res.status(400).json({ error: 'Missing name' });
 
       const page = await notion.pages.create({
@@ -78,6 +78,8 @@ module.exports = async (req, res) => {
           Status:             { select: { name: 'Suggested' } },
           'Hours per Week':   { number: hours || 0 },
           Notes:              rt(notes),
+          'Submitted by':     rt(submittedBy),
+          'Submitted at':     { date: { start: new Date().toISOString().split('T')[0] } },
         },
       });
       return res.json({ id: page.id });

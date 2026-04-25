@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suggest an Automation — 47G</title>
+<style>
+  :root {
+    --black: #000000;
+    --sand:  #F6F5EF;
+    --grey:  #7D7D7D;
+    --font:  'ABC Diatype', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    --p-high:   #C0392B;
+    --p-medium: #B7791F;
+    --p-low:    #7D7D7D;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--sand);
+    color: var(--black);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--black);
+    color: var(--sand);
+    padding: 28px 48px;
+    border-bottom: 1px solid rgba(246,245,239,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 { font-size: 22px; font-weight: 400; letter-spacing: -0.2px; }
+  .header-left .meta { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); margin-top: 4px; }
+  .header-right { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 64px 24px 80px;
+  }
+
+  .form-wrap {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .form-intro {
+    margin-bottom: 40px;
+  }
+  .form-intro .label {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--grey); margin-bottom: 10px; display: block;
+  }
+  .form-intro h2 {
+    font-size: 32px; font-weight: 400; line-height: 1.15;
+    letter-spacing: -0.5px; margin-bottom: 14px;
+  }
+  .form-intro p {
+    font-size: 14px; color: var(--grey); line-height: 1.65; max-width: 440px;
+  }
+
+  /* ── Form fields ── */
+  .field { margin-bottom: 24px; }
+
+  .field label {
+    display: block;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--grey); margin-bottom: 8px;
+  }
+  .field label .required { color: var(--p-high); margin-left: 2px; }
+
+  .field input[type="text"],
+  .field input[type="number"],
+  .field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: var(--font); font-size: 14px; line-height: 1.5;
+    background: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.18);
+    color: var(--black);
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field textarea:focus { border-color: rgba(0,0,0,0.5); }
+  .field input::placeholder,
+  .field textarea::placeholder { color: rgba(125,125,125,0.5); }
+  .field textarea { resize: vertical; min-height: 90px; }
+
+  /* Priority toggle */
+  .priority-row { display: flex; gap: 8px; }
+  .priority-opt { display: none; }
+  .priority-opt + label {
+    flex: 1; padding: 9px 0; text-align: center;
+    font-family: var(--font); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    border: 1px solid; transition: background 0.12s;
+  }
+  .priority-opt.high   + label { color: var(--p-high);   border-color: var(--p-high); }
+  .priority-opt.medium + label { color: var(--p-medium); border-color: var(--p-medium); }
+  .priority-opt.low    + label { color: var(--p-low);    border-color: rgba(125,125,125,0.4); }
+  .priority-opt.high:checked   + label { background: rgba(192,57,43,0.1); }
+  .priority-opt.medium:checked + label { background: rgba(183,121,31,0.1); }
+  .priority-opt.low:checked    + label { background: rgba(125,125,125,0.1); }
+
+  /* Hours hint */
+  .field-hint {
+    font-size: 11px; color: var(--grey); margin-top: 6px; letter-spacing: 0.02em;
+  }
+
+  /* Divider */
+  .divider {
+    border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 32px 0;
+  }
+
+  /* Submit */
+  .submit-row { display: flex; justify-content: flex-end; margin-top: 32px; }
+  .btn-submit {
+    font-family: var(--font); font-size: 12px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 13px 32px; cursor: pointer;
+    background: var(--black); border: 1px solid var(--black); color: var(--sand);
+    transition: background 0.15s;
+  }
+  .btn-submit:hover:not(:disabled) { background: #222; }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Confirmation screen ── */
+  .confirmation {
+    display: none;
+    text-align: center;
+    padding: 48px 0;
+  }
+  .confirmation.visible { display: block; }
+  .form-wrap.submitted .form-body { display: none; }
+
+  .confirm-mark {
+    font-size: 28px; margin-bottom: 24px;
+  }
+  .confirm-heading {
+    font-size: 26px; font-weight: 400; letter-spacing: -0.3px; margin-bottom: 12px;
+  }
+  .confirm-sub {
+    font-size: 14px; color: var(--grey); line-height: 1.65; margin-bottom: 32px;
+  }
+  .btn-another {
+    font-family: var(--font); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 10px 24px; cursor: pointer;
+    background: transparent; border: 1px solid rgba(0,0,0,0.25); color: var(--black);
+  }
+  .btn-another:hover { border-color: var(--black); }
+
+  /* Error */
+  .error-msg {
+    display: none;
+    font-size: 12px; color: var(--p-high); margin-top: 16px; text-align: right;
+  }
+  .error-msg.visible { display: block; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid rgba(0,0,0,0.1); padding: 20px 48px;
+    display: flex; justify-content: space-between;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey);
+  }
+
+  @media (max-width: 600px) {
+    header, footer { padding: 20px 24px; }
+    main { padding: 40px 24px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>47G Automation Lab</h1>
+    <div class="meta">AI Builder Program · Sprint 1</div>
+  </div>
+  <div class="header-right">47G.ORG ↗</div>
+</header>
+
+<main>
+  <div class="form-wrap" id="form-wrap">
+
+    <div class="form-intro">
+      <span class="label">[Suggest]</span>
+      <h2>What should we automate next?</h2>
+      <p>If there's a repetitive task eating your time — or something you think the team could do faster with AI — submit it here. Every idea gets reviewed.</p>
+    </div>
+
+    <div class="form-body">
+
+      <div class="field">
+        <label>Automation idea <span class="required">*</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Auto-draft follow-up emails after meetings" maxlength="120">
+      </div>
+
+      <div class="field">
+        <label>What's the problem it solves?</label>
+        <textarea id="f-desc" placeholder="Describe what's happening today and what the automated version would look like..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Estimated hours saved / week</label>
+        <input type="number" id="f-hours" min="0" step="0.5" placeholder="e.g. 2">
+        <div class="field-hint">Rough guess is fine — even 0.5h adds up.</div>
+      </div>
+
+      <div class="field">
+        <label>Priority (your take)</label>
+        <div class="priority-row">
+          <input class="priority-opt high"   type="radio" name="priority" id="p-high"   value="high">
+          <label for="p-high">High</label>
+          <input class="priority-opt medium" type="radio" name="priority" id="p-medium" value="medium" checked>
+          <label for="p-medium">Medium</label>
+          <input class="priority-opt low"    type="radio" name="priority" id="p-low"    value="low">
+          <label for="p-low">Low</label>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="f-name-submitter" placeholder="First name is fine">
+      </div>
+
+      <div class="submit-row">
+        <button class="btn-submit" id="submit-btn">Submit idea →</button>
+      </div>
+      <div class="error-msg" id="error-msg">Something went wrong — please try again.</div>
+
+    </div>
+
+    <!-- Confirmation -->
+    <div class="confirmation" id="confirmation">
+      <div class="confirm-mark">[ ✓ ]</div>
+      <div class="confirm-heading">Idea submitted.</div>
+      <div class="confirm-sub">It's been added to the roadmap for review.<br>Thanks for contributing.</div>
+      <button class="btn-another" id="another-btn">Submit another →</button>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>47G Automation Lab — April 2026</span>
+  <span>Gerritt Vander Linden · 47G</span>
+</footer>
+
+<script>
+  const submitBtn  = document.getElementById("submit-btn");
+  const errorMsg   = document.getElementById("error-msg");
+  const formBody   = document.querySelector(".form-body");
+  const confirm    = document.getElementById("confirmation");
+  const anotherBtn = document.getElementById("another-btn");
+
+  submitBtn.addEventListener("click", async () => {
+    const name  = document.getElementById("f-name").value.trim();
+    if (!name) {
+      document.getElementById("f-name").focus();
+      return;
+    }
+
+    const priority = document.querySelector('input[name="priority"]:checked')?.value || "medium";
+
+    submitBtn.disabled   = true;
+    submitBtn.textContent = "Submitting...";
+    errorMsg.classList.remove("visible");
+
+    try {
+      const res = await fetch("/api/roadmap", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          desc:     document.getElementById("f-desc").value.trim(),
+          hours:    parseFloat(document.getElementById("f-hours").value) || 0,
+          priority,
+          notes:    "",
+          submittedBy: document.getElementById("f-name-submitter").value.trim(),
+        }),
+      });
+
+      if (!res.ok) throw new Error("API error");
+
+      formBody.style.display  = "none";
+      confirm.classList.add("visible");
+
+    } catch {
+      errorMsg.classList.add("visible");
+      submitBtn.disabled    = false;
+      submitBtn.textContent = "Submit idea →";
+    }
+  });
+
+  anotherBtn.addEventListener("click", () => {
+    document.getElementById("f-name").value = "";
+    document.getElementById("f-desc").value = "";
+    document.getElementById("f-hours").value = "";
+    document.getElementById("f-name-submitter").value = "";
+    document.getElementById("p-medium").checked = true;
+    formBody.style.display   = "";
+    confirm.classList.remove("visible");
+    submitBtn.disabled       = false;
+    submitBtn.textContent    = "Submit idea →";
+    document.getElementById("f-name").focus();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      submitBtn.click();
+    }
+  });
+</script>
+</body>
+</html>
