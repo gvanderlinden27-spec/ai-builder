@@ -394,7 +394,7 @@
   </div>
   <div class="header-right">
     <div class="header-actions">
-      <button class="btn-header" id="share-dashboard-btn">Share dashboard →</button>
+      <button class="btn-header" id="share-dashboard-btn">Share dashboard ↗</button>
       <button class="btn-header" id="share-btn">Share suggest form ↗</button>
       <button class="btn-header" id="archive-toggle">Show archive</button>
     </div>
@@ -416,7 +416,7 @@
   </div>
 </div>
 
-<div class="readonly-banner" id="readonly-banner" style="display:none">[View only] — Contact Gerritt to suggest changes or submit an idea at <span id="suggest-link"></span></div>
+<div class="readonly-banner" id="readonly-banner" style="display:none">[View only] — <a id="suggest-link" href="" style="color:var(--black);text-decoration:underline;text-underline-offset:2px">Submit an idea →</a></div>
 
 <div class="search-bar">
   <input class="search-input" id="search-input" type="text" placeholder="Filter automations...">
@@ -796,7 +796,7 @@
   function applyReadonly() {
     if (!READONLY) return;
     document.getElementById("readonly-banner").style.display = "";
-    document.getElementById("suggest-link").textContent = location.origin + "/suggest";
+    document.getElementById("suggest-link").href = location.origin + "/suggest";
     document.getElementById("share-btn").style.display       = "none";
     document.getElementById("share-dashboard-btn").style.display = "none";
     document.getElementById("archive-toggle").style.display  = "none";
@@ -830,7 +830,7 @@
 
   // Share readonly dashboard
   document.getElementById("share-dashboard-btn").addEventListener("click", () => {
-    const url = location.origin + "/?readonly";
+    const url = location.origin + location.pathname + '?readonly';
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById("share-dashboard-btn");
       btn.textContent = "Copied!";
