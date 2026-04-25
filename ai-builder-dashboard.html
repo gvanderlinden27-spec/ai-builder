@@ -177,6 +177,11 @@
   }
   .card-rank { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(125,125,125,0.55); }
   .card-notes-indicator { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+  .card-hours {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--black); white-space: nowrap;
+  }
+  .card-hours-zero { color: rgba(125,125,125,0.4); }
 
   /* ── Ghost ── */
   #drag-ghost {
@@ -342,8 +347,9 @@
         <span class="col-title">[1] Suggested</span>
         <span class="col-count" id="count-suggested">0</span>
       </div>
-      <div class="column-cards" id="cards-suggested" data-col="suggested"></div>
-      <button class="add-idea-btn" id="add-idea-btn">+ Add idea</button>
+      <div class="column-cards" id="cards-suggested" data-col="suggested">
+        <button class="add-idea-btn" id="add-idea-btn">+ Add idea</button>
+      </div>
     </div>
     <div class="column" id="col-to-build">
       <div class="column-header">
@@ -395,6 +401,9 @@
       <button class="priority-btn low"    data-p="low">Low</button>
     </div>
 
+    <label class="modal-label">Hours saved / week</label>
+    <input class="modal-input" id="modal-hours" type="number" min="0" step="0.5" placeholder="e.g. 1.5" style="margin-bottom:24px">
+
     <label class="modal-label">Notes</label>
     <textarea class="notes-textarea" id="modal-notes" placeholder="Add notes..."></textarea>
 
@@ -427,6 +436,14 @@
 
   const COL_ORDER       = ["suggested", "to-build", "in-progress", "done"];
   const STORAGE_KEY     = "47g-kanban-v4";
+  const PRIORITY_ORDER  = { high: 0, medium: 1, low: 2 };
+
+  function sortCards() {
+    cards.sort((a, b) => {
+      const pd = (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2);
+      return pd !== 0 ? pd : (b.hours || 0) - (a.hours || 0);
+    });
+  }
   const CLICK_THRESHOLD = 5;
 
   // ── State — declared before render() ────────────────────────────────────
@@ -437,28 +454,45 @@
   let modalPriority = null;
   let modalMode     = "edit"; // "edit" | "add"
 
-  // ── Persistence ──────────────────────────────────────────────────────────
+  // ── API + persistence ────────────────────────────────────────────────────
 
-  function persist() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  const CACHE_KEY = "47g-kanban-cache";
+
+  async function apiGet() {
+    const res = await fetch('/api/roadmap');
+    if (!res.ok) throw new Error('API error');
+    return res.json();
+  }
+  async function apiPatch(id, fields) {
+    await fetch('/api/roadmap', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...fields }),
+    });
+  }
+  async function apiPost(fields) {
+    const res = await fetch('/api/roadmap', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fields),
+    });
+    return res.json();
+  }
+  async function apiDelete(id) {
+    await fetch('/api/roadmap', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
   }
 
-  function loadCards() {
+  async function loadCards() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw);
-        // Merge: update defaults with saved state; keep any user-added cards
-        const savedMap = {};
-        saved.forEach(c => { savedMap[c.id] = c; });
-        cards = DEFAULTS.map(d => Object.assign({}, d, savedMap[d.id] || {}));
-        // Append user-created cards not in DEFAULTS
-        const defaultIds = new Set(DEFAULTS.map(d => d.id));
-        saved.forEach(c => { if (!defaultIds.has(c.id)) cards.push(c); });
-      } else {
-        cards = DEFAULTS.map(d => Object.assign({}, d));
-      }
+      cards = await apiGet();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cards));
     } catch {
+      // Offline / file:// fallback — use cached data or built-in defaults
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+        if (cached && cached.length) { cards = cached; return; }
+      } catch {}
       cards = DEFAULTS.map(d => Object.assign({}, d));
     }
   }
@@ -490,6 +524,7 @@
   const modalNameInp  = document.getElementById("modal-name-input");
   const modalDescLbl  = document.getElementById("modal-desc-label");
   const modalDescInp  = document.getElementById("modal-desc-input");
+  const modalHours    = document.getElementById("modal-hours");
   const modalNotes    = document.getElementById("modal-notes");
   const modalDelete   = document.getElementById("modal-delete");
   const priorityBtns  = document.querySelectorAll(".priority-btn");
@@ -511,8 +546,9 @@
     modalNameInp.style.display  = "none";
     modalDescLbl.style.display  = "none";
     modalDescInp.style.display  = "none";
+    modalHours.value            = card.hours || "";
     modalNotes.value            = card.notes || "";
-    modalDelete.className       = card.rank ? "btn btn-delete hidden" : "btn btn-delete"; // hide delete for built-ins
+    modalDelete.className       = card.rank ? "btn btn-delete hidden" : "btn btn-delete";
     setPriority(card.priority);
     overlay.classList.add("open");
     modalNotes.focus();
@@ -529,6 +565,7 @@
     modalDescLbl.style.display  = "";
     modalDescInp.style.display  = "";
     modalDescInp.value          = "";
+    modalHours.value            = "";
     modalNotes.value            = "";
     modalDelete.className       = "btn btn-delete hidden";
     setPriority("medium");
@@ -545,32 +582,44 @@
     if (modalMode === "edit") {
       const card = cards.find(c => c.id === modalCardId);
       if (!card) return;
-      card.priority = modalPriority;
-      card.notes    = modalNotes.value.trim();
+      const fields = {
+        priority: modalPriority,
+        hours:    parseFloat(modalHours.value) || 0,
+        notes:    modalNotes.value.trim(),
+      };
+      Object.assign(card, fields);
+      closeModal();
+      render();
+      apiPatch(card.id, fields).catch(console.error);
     } else {
       const name = modalNameInp.value.trim();
       if (!name) { modalNameInp.focus(); return; }
-      cards.push({
-        id:       "user-" + Date.now(),
+      const newCard = {
+        id:       "pending-" + Date.now(),
         name,
         desc:     modalDescInp.value.trim(),
         priority: modalPriority,
         notes:    modalNotes.value.trim(),
         col:      "suggested",
-        hours:    0,
-      });
+        hours:    parseFloat(modalHours.value) || 0,
+      };
+      cards.push(newCard);
+      closeModal();
+      render();
+      apiPost({ name: newCard.name, desc: newCard.desc, priority: newCard.priority,
+                hours: newCard.hours, notes: newCard.notes })
+        .then(({ id }) => { newCard.id = id; })
+        .catch(console.error);
     }
-    persist();
-    closeModal();
-    render();
   }
 
   function deleteCard() {
     if (!modalCardId) return;
-    cards = cards.filter(c => c.id !== modalCardId);
-    persist();
+    const id = modalCardId;
+    cards = cards.filter(c => c.id !== id);
     closeModal();
     render();
+    apiDelete(id).catch(console.error);
   }
 
   priorityBtns.forEach(btn => btn.addEventListener("click", () => setPriority(btn.dataset.p)));
@@ -621,7 +670,9 @@
     removePlaceholder();
     const ph = document.createElement("div");
     ph.className = "drop-placeholder";
-    zone.appendChild(ph);
+    const addBtn = zone.querySelector(".add-idea-btn");
+    if (addBtn) zone.insertBefore(ph, addBtn);
+    else zone.appendChild(ph);
     dragState.placeholder = ph;
     requestAnimationFrame(() => ph.classList.add("active"));
   }
@@ -682,7 +733,10 @@
       const targetCol = zone.dataset.col;
       if (targetCol) {
         const card = cards.find(c => c.id === dragState.id);
-        if (card) { card.col = targetCol; persist(); }
+        if (card) {
+          card.col = targetCol;
+          apiPatch(card.id, { col: targetCol }).catch(console.error);
+        }
       }
     }
 
@@ -744,13 +798,15 @@
       <div class="card-desc">${card.desc || ''}</div>
       <div class="card-footer">
         <div class="card-rank">${card.rank || ''}</div>
-        ${card.notes ? '<div class="card-notes-indicator">[notes]</div>' : ''}
+        <div class="card-hours ${card.hours ? '' : 'card-hours-zero'}">${card.hours ? card.hours + 'h/wk' : '—'}</div>
       </div>
+      ${card.notes ? '<div class="card-notes-indicator" style="margin-top:6px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--grey)">[notes]</div>' : ''}
     `;
     return el;
   }
 
   function render() {
+    sortCards();
     const zones = {};
     COL_ORDER.forEach(col => { zones[col] = document.getElementById(`cards-${col}`); });
 
@@ -761,6 +817,7 @@
       snapshots[c.dataset.id] = { top: r.top, left: r.left };
     });
 
+    const addBtn = document.getElementById("add-idea-btn");
     Object.values(zones).forEach(z => z.innerHTML = "");
 
     cards.forEach(card => {
@@ -789,14 +846,14 @@
       });
     });
 
+    zones["suggested"].appendChild(addBtn);
     updateCounts();
     updateStats();
   }
 
   document.querySelector(".board").addEventListener("pointerdown", onPointerDown);
 
-  loadCards();
-  render();
+  loadCards().then(render);
 </script>
 </body>
 </html>
