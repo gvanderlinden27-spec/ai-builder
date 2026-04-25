@@ -23,7 +23,10 @@
     font-family: var(--font);
     font-size: 15px;
     line-height: 1.6;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── Header ── */
@@ -73,15 +76,17 @@
   .stat-value.reclaimed { color: #6fcf97; }
 
   /* ── Board ── */
-  .board-wrapper { padding: 40px 32px 60px; overflow-x: auto; }
+  .board-wrapper { padding: 24px 32px; overflow-x: auto; flex: 1; min-height: 0; }
   .board {
+    height: 100%;
     display: grid;
     grid-template-columns: repeat(4, minmax(280px, 1fr));
     gap: 20px;
     min-width: 1100px;
+    align-items: stretch;
   }
 
-  .column { display: flex; flex-direction: column; }
+  .column { display: flex; flex-direction: column; min-height: 0; }
   .column-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 0 12px; border-bottom: 2px solid var(--black); margin-bottom: 16px;
@@ -94,7 +99,7 @@
   .column.suggested .column-cards {
     background: rgba(0,0,0,0.03);
     border: 1px dashed rgba(0,0,0,0.15);
-    min-height: 200px; border-radius: 2px; padding: 12px;
+    border-radius: 2px; padding: 12px;
   }
   .column.suggested .column-cards .card { background: #E4E3DC; border-color: rgba(0,0,0,0.1); }
   .column.suggested .column-cards .card .card-name { color: var(--grey); }
@@ -123,7 +128,8 @@
 
   .column-cards {
     display: flex; flex-direction: column; gap: 10px;
-    flex: 1; min-height: 200px; padding: 4px 0;
+    flex: 1; min-height: 0; padding: 4px 0;
+    overflow-y: auto;
     transition: background 0.15s, outline 0.15s;
     position: relative;
   }
