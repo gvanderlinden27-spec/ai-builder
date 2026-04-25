@@ -44,6 +44,7 @@ module.exports = async (req, res) => {
           hours:    p['Hours per Week']?.number || 0,
           notes:    p.Notes?.rich_text?.[0]?.plain_text || '',
           submittedBy: p['Submitted by']?.rich_text?.[0]?.plain_text || '',
+          submittedAt: p['Submitted at']?.date?.start || '',
         };
       });
       return res.json(cards);
@@ -83,6 +84,19 @@ module.exports = async (req, res) => {
           'Submitted at':     { date: { start: new Date().toISOString().split('T')[0] } },
         },
       });
+      if (process.env.RESEND_API_KEY) {
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Automation Lab <onboarding@resend.dev>',
+            to: process.env.NOTIFY_EMAIL || 'gvanderlinden27@gmail.com',
+            subject: `New automation idea: ${name}`,
+            html: `<p><strong>${name}</strong></p><p>${desc || '(no description)'}</p><p>Priority: ${priority} | Hours saved: ${hours || 0}/wk</p><p>Submitted by: ${submittedBy || 'Anonymous'}</p>`,
+          }),
+        }).catch(() => {});
+      }
+
       return res.json({ id: page.id });
     }
 
