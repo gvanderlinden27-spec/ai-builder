@@ -342,6 +342,41 @@
   .column.archived .col-title { color: var(--grey); }
   .column.archived .column-cards { background: rgba(0,0,0,0.02); }
 
+  /* ── Multiselect action bar ── */
+  .multiselect-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--black); color: var(--sand);
+    padding: 14px 48px;
+    display: none; align-items: center; gap: 14px;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    z-index: 200; border-top: 1px solid rgba(246,245,239,0.1);
+  }
+  .multiselect-bar.visible { display: flex; }
+  .ms-label { color: var(--grey); white-space: nowrap; }
+  .btn-ms {
+    font-family: var(--font); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 12px; cursor: pointer;
+    background: transparent; border: 1px solid rgba(246,245,239,0.25); color: var(--sand);
+  }
+  .btn-ms:hover { border-color: rgba(246,245,239,0.7); }
+  .btn-ms-clear {
+    font-family: var(--font); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 0; cursor: pointer; background: none; border: none; color: var(--grey);
+    margin-left: auto;
+  }
+  .btn-ms-clear:hover { color: var(--sand); }
+
+  /* ── Card selected state ── */
+  .card.selected { outline: 2px solid var(--black); outline-offset: 2px; }
+
+  /* ── Readonly banner ── */
+  .readonly-banner {
+    background: rgba(0,0,0,0.06); padding: 7px 48px;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+
   /* ── Footer ── */
   footer {
     border-top: 1px solid rgba(0,0,0,0.1); padding: 20px 48px;
@@ -359,9 +394,9 @@
   </div>
   <div class="header-right">
     <div class="header-actions">
+      <button class="btn-header" id="share-dashboard-btn">Share dashboard →</button>
       <button class="btn-header" id="share-btn">Share suggest form ↗</button>
       <button class="btn-header" id="archive-toggle">Show archive</button>
-      <span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey)">47G.ORG ↗</span>
     </div>
   </div>
 </header>
@@ -380,6 +415,8 @@
     <div class="stat-label">/ week reclaimed</div>
   </div>
 </div>
+
+<div class="readonly-banner" id="readonly-banner" style="display:none">[View only] — Contact Gerritt to suggest changes or submit an idea at <span id="suggest-link"></span></div>
 
 <div class="search-bar">
   <input class="search-input" id="search-input" type="text" placeholder="Filter automations...">
@@ -475,6 +512,19 @@
   </div>
 </div>
 
+<!-- Multiselect action bar -->
+<div class="multiselect-bar" id="multiselect-bar">
+  <span class="ms-label" id="ms-count"></span>
+  <span style="color:rgba(246,245,239,0.2)">|</span>
+  <span style="color:var(--grey);font-size:10px;letter-spacing:0.08em">Move to:</span>
+  <button class="btn-ms" data-col="suggested">Suggested</button>
+  <button class="btn-ms" data-col="to-build">To Build</button>
+  <button class="btn-ms" data-col="in-progress">In Progress</button>
+  <button class="btn-ms" data-col="done">Done</button>
+  <button class="btn-ms" data-col="archived">Archive</button>
+  <button class="btn-ms-clear" id="ms-clear">Clear ×</button>
+</div>
+
 <footer>
   <span>Automation Roadmap — April 2026</span>
   <span>Click to edit · Drag to move · Saved automatically</span>
@@ -512,13 +562,15 @@
 
   // ── State — declared before render() ────────────────────────────────────
 
-  let cards         = [];
-  let dragState     = null;
-  let modalCardId   = null;
-  let modalPriority = null;
-  let modalMode     = "edit"; // "edit" | "add"
-  let searchQuery   = "";
+  const READONLY     = new URLSearchParams(location.search).has('readonly');
+  let cards          = [];
+  let dragState      = null;
+  let modalCardId    = null;
+  let modalPriority  = null;
+  let modalMode      = "edit"; // "edit" | "add"
+  let searchQuery    = "";
   let archiveVisible = false;
+  let selectedIds    = new Set();
 
   // ── API + persistence ────────────────────────────────────────────────────
 
@@ -705,6 +757,52 @@
     apiDelete(id).catch(console.error);
   }
 
+  // ── Multiselect ───────────────────────────────────────────────────────────
+
+  function updateMultiselectBar() {
+    const bar = document.getElementById("multiselect-bar");
+    const n   = selectedIds.size;
+    bar.classList.toggle("visible", n > 0);
+    document.getElementById("ms-count").textContent = n === 1 ? "1 card selected" : `${n} cards selected`;
+    document.querySelectorAll(".card").forEach(el => {
+      el.classList.toggle("selected", selectedIds.has(el.dataset.id));
+    });
+  }
+
+  function clearSelection() {
+    selectedIds.clear();
+    updateMultiselectBar();
+  }
+
+  function moveSelected(col) {
+    selectedIds.forEach(id => {
+      const card = cards.find(c => c.id === id);
+      if (card) {
+        card.col = col;
+        apiPatch(card.id, { col }).catch(console.error);
+      }
+    });
+    clearSelection();
+    render();
+  }
+
+  document.querySelectorAll(".btn-ms").forEach(btn => {
+    btn.addEventListener("click", () => moveSelected(btn.dataset.col));
+  });
+  document.getElementById("ms-clear").addEventListener("click", clearSelection);
+
+  // ── Readonly ──────────────────────────────────────────────────────────────
+
+  function applyReadonly() {
+    if (!READONLY) return;
+    document.getElementById("readonly-banner").style.display = "";
+    document.getElementById("suggest-link").textContent = location.origin + "/suggest";
+    document.getElementById("share-btn").style.display       = "none";
+    document.getElementById("share-dashboard-btn").style.display = "none";
+    document.getElementById("archive-toggle").style.display  = "none";
+    document.getElementById("add-idea-btn").style.display    = "none";
+  }
+
   priorityBtns.forEach(btn => btn.addEventListener("click", () => setPriority(btn.dataset.p)));
   document.getElementById("modal-save").addEventListener("click", saveModal);
   document.getElementById("modal-cancel").addEventListener("click", closeModal);
@@ -727,6 +825,17 @@
       btn.textContent = "Copied!";
       btn.classList.add("copied");
       setTimeout(() => { btn.textContent = "Share suggest form ↗"; btn.classList.remove("copied"); }, 2000);
+    });
+  });
+
+  // Share readonly dashboard
+  document.getElementById("share-dashboard-btn").addEventListener("click", () => {
+    const url = location.origin + "/?readonly";
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById("share-dashboard-btn");
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = "Share dashboard →"; btn.classList.remove("copied"); }, 2000);
     });
   });
 
@@ -860,6 +969,24 @@
     const zone = cardEl.closest(".column-cards");
     if (!zone) return;
 
+    // Shift-click: toggle multiselect
+    if (e.shiftKey) {
+      e.preventDefault();
+      const id = cardEl.dataset.id;
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateMultiselectBar();
+      return;
+    }
+
+    // Click on unselected card when others are selected: clear selection
+    if (selectedIds.size > 0) {
+      clearSelection();
+      return;
+    }
+
+    if (READONLY) return;
+
     e.preventDefault();
     dragState = {
       id:       cardEl.dataset.id,
@@ -966,6 +1093,7 @@
 
   document.querySelector(".board").addEventListener("pointerdown", onPointerDown);
 
+  applyReadonly();
   loadCards().then(render);
 </script>
 </body>
