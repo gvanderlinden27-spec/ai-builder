@@ -865,6 +865,7 @@
 
     // N — open add modal
     if ((e.key === "n" || e.key === "N") && !inInput && !overlay.classList.contains("open") && !READONLY) {
+      e.preventDefault();
       openAddModal();
     }
 
