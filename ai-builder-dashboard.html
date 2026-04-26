@@ -335,6 +335,24 @@
   .btn-header:hover { border-color: rgba(246,245,239,0.7); }
   .btn-header.copied { border-color: rgba(246,245,239,0.7); color: rgba(246,245,239,0.6); }
 
+  /* ── Sync indicator ── */
+  .sync-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--grey); white-space: nowrap;
+  }
+  .sync-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--grey); flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .sync-indicator.ok   .sync-dot { background: rgba(246,245,239,0.55); }
+  .sync-indicator.ok              { color: rgba(246,245,239,0.45); }
+  .sync-indicator.error .sync-dot { background: #C0392B; }
+  .sync-indicator.error           { color: #C0392B; }
+  .sync-indicator.syncing .sync-dot { background: var(--grey); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
   /* ── Archive column ── */
   .column.archived { display: none; }
   .column.archived.visible { display: flex; }
@@ -398,6 +416,7 @@
   </div>
   <div class="header-right">
     <div class="header-actions">
+      <div class="sync-indicator syncing" id="sync-indicator"><div class="sync-dot"></div><span id="sync-label">Connecting</span></div>
       <button class="btn-header" id="share-dashboard-btn">Share dashboard ↗</button>
       <button class="btn-header" id="share-btn">Share suggest form ↗</button>
       <button class="btn-header" id="archive-toggle">Show archive</button>
@@ -580,36 +599,56 @@
 
   const CACHE_KEY = "47g-kanban-cache";
 
+  let syncErrorTimer = null;
+  function setSyncState(state, label) {
+    const el  = document.getElementById("sync-indicator");
+    const lbl = document.getElementById("sync-label");
+    if (!el) return;
+    el.className = "sync-indicator " + state;
+    lbl.textContent = label;
+  }
+  function flashSyncError() {
+    setSyncState("error", "Sync error");
+    clearTimeout(syncErrorTimer);
+    syncErrorTimer = setTimeout(() => setSyncState("ok", "Synced"), 4000);
+  }
+
   async function apiGet() {
     const res = await fetch('/api/roadmap');
     if (!res.ok) throw new Error('API error');
     return res.json();
   }
   async function apiPatch(id, fields) {
-    await fetch('/api/roadmap', {
+    const res = await fetch('/api/roadmap', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, ...fields }),
     });
+    if (!res.ok) flashSyncError();
   }
   async function apiPost(fields) {
     const res = await fetch('/api/roadmap', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(fields),
     });
+    if (!res.ok) flashSyncError();
     return res.json();
   }
   async function apiDelete(id) {
-    await fetch('/api/roadmap', {
+    const res = await fetch('/api/roadmap', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     });
+    if (!res.ok) flashSyncError();
   }
 
   async function loadCards() {
+    setSyncState("syncing", "Connecting");
     try {
       cards = await apiGet();
       localStorage.setItem(CACHE_KEY, JSON.stringify(cards));
+      setSyncState("ok", "Synced");
     } catch {
+      setSyncState("error", "Offline");
       // Offline / file:// fallback — use cached data or built-in defaults
       try {
         const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
