@@ -496,15 +496,13 @@
     <button class="modal-close" id="modal-close">×</button>
     <div class="modal-heading" id="modal-heading">Edit card</div>
 
-    <!-- Static name (edit mode) -->
-    <div class="modal-card-name" id="modal-name-display"></div>
+    <!-- Editable name (both modes) -->
+    <label class="modal-label">Automation name <span style="color:var(--p-high)">*</span></label>
+    <input class="modal-input" id="modal-name-input" type="text" placeholder="Automation name...">
 
-    <!-- Editable name (add mode) -->
-    <input class="modal-input" id="modal-name-input" type="text" placeholder="Automation name..." style="display:none">
-
-    <!-- Editable desc (add mode) -->
-    <label class="modal-label" id="modal-desc-label" style="display:none">Description</label>
-    <input class="modal-input" id="modal-desc-input" type="text" placeholder="One-line description..." style="display:none">
+    <!-- Editable desc (both modes) -->
+    <label class="modal-label" id="modal-desc-label">Description</label>
+    <input class="modal-input" id="modal-desc-input" type="text" placeholder="One-line description...">
 
     <label class="modal-label">Priority</label>
     <div class="priority-selector">
@@ -681,9 +679,7 @@
 
   const overlay       = document.getElementById("modal-overlay");
   const modalHeading  = document.getElementById("modal-heading");
-  const modalNameDisp = document.getElementById("modal-name-display");
   const modalNameInp  = document.getElementById("modal-name-input");
-  const modalDescLbl  = document.getElementById("modal-desc-label");
   const modalDescInp  = document.getElementById("modal-desc-input");
   const modalSubmittedBy = document.getElementById("modal-submitted-by");
   const modalHours    = document.getElementById("modal-hours");
@@ -702,37 +698,30 @@
     modalMode     = "edit";
     modalCardId   = id;
 
-    modalHeading.textContent    = "Edit card";
-    modalNameDisp.textContent   = card.name;
-    modalNameDisp.style.display = "";
-    modalNameInp.style.display  = "none";
-    modalDescLbl.style.display  = "none";
-    modalDescInp.style.display  = "none";
-    modalSubmittedBy.value      = card.submittedBy || "";
-    modalHours.value            = card.hours || "";
-    modalNotes.value            = card.notes || "";
+    modalHeading.textContent = "Edit card";
+    modalNameInp.value       = card.name;
+    modalDescInp.value       = card.desc || "";
+    modalSubmittedBy.value   = card.submittedBy || "";
+    modalHours.value         = card.hours || "";
+    modalNotes.value         = card.notes || "";
     const canDelete = !card.rank;
     modalDelete.className  = canDelete ? "btn btn-delete" : "btn btn-delete hidden";
     document.getElementById("modal-archive").className = canDelete ? "btn btn-delete" : "btn btn-delete hidden";
     setPriority(card.priority);
     overlay.classList.add("open");
-    modalNotes.focus();
+    modalNameInp.focus();
   }
 
   function openAddModal() {
     modalMode   = "add";
     modalCardId = null;
 
-    modalHeading.textContent    = "Add idea";
-    modalNameDisp.style.display = "none";
-    modalNameInp.style.display  = "";
-    modalNameInp.value          = "";
-    modalDescLbl.style.display  = "";
-    modalDescInp.style.display  = "";
-    modalDescInp.value          = "";
-    modalHours.value            = "";
-    modalNotes.value            = "";
-    modalDelete.className = "btn btn-delete hidden";
+    modalHeading.textContent = "Add idea";
+    modalNameInp.value       = "";
+    modalDescInp.value       = "";
+    modalHours.value         = "";
+    modalNotes.value         = "";
+    modalDelete.className    = "btn btn-delete hidden";
     document.getElementById("modal-archive").className = "btn btn-delete hidden";
     setPriority("medium");
     overlay.classList.add("open");
@@ -748,7 +737,11 @@
     if (modalMode === "edit") {
       const card = cards.find(c => c.id === modalCardId);
       if (!card) return;
+      const newName = modalNameInp.value.trim();
+      if (!newName) { modalNameInp.focus(); return; }
       const fields = {
+        name:        newName,
+        desc:        modalDescInp.value.trim(),
         priority:    modalPriority,
         submittedBy: modalSubmittedBy.value.trim(),
         hours:       parseFloat(modalHours.value) || 0,
