@@ -502,7 +502,7 @@
 
     <!-- Editable desc (both modes) -->
     <label class="modal-label" id="modal-desc-label">Description</label>
-    <input class="modal-input" id="modal-desc-input" type="text" placeholder="One-line description...">
+    <textarea class="modal-input" id="modal-desc-input" placeholder="Description..." rows="3" style="resize:none;overflow:hidden;line-height:1.5;"></textarea>
 
     <label class="modal-label">Priority</label>
     <div class="priority-selector">
@@ -681,6 +681,12 @@
   const modalHeading  = document.getElementById("modal-heading");
   const modalNameInp  = document.getElementById("modal-name-input");
   const modalDescInp  = document.getElementById("modal-desc-input");
+
+  function autoResizeDesc() {
+    modalDescInp.style.height = "auto";
+    modalDescInp.style.height = modalDescInp.scrollHeight + "px";
+  }
+  modalDescInp.addEventListener("input", autoResizeDesc);
   const modalSubmittedBy = document.getElementById("modal-submitted-by");
   const modalHours    = document.getElementById("modal-hours");
   const modalNotes    = document.getElementById("modal-notes");
@@ -701,6 +707,7 @@
     modalHeading.textContent = "Edit card";
     modalNameInp.value       = card.name;
     modalDescInp.value       = card.desc || "";
+    setTimeout(autoResizeDesc, 0);
     modalSubmittedBy.value   = card.submittedBy || "";
     modalHours.value         = card.hours || "";
     modalNotes.value         = card.notes || "";
