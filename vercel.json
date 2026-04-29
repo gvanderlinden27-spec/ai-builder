@@ -2,11 +2,11 @@
   "builds": [
     { "src": "api/roadmap.js", "use": "@vercel/node" },
     { "src": "*.html", "use": "@vercel/static" },
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "leland-builder-2/*.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/roadmap", "dest": "/api/roadmap.js" },
-    { "src": "/suggest", "dest": "/suggest.html" },
+    { "src": "/suggest", "dest": "/leland-builder-2/suggest.html" },
     { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]

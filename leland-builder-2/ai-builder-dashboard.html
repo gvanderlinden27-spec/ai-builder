@@ -1220,5 +1220,28 @@
   applyReadonly();
   loadCards().then(render);
 </script>
+
+<!-- Build Plans -->
+<div style="max-width:640px;margin:32px auto 48px;padding:0 24px">
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(125,125,125,0.6);margin-bottom:12px">Build Plans</div>
+  <div style="background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:8px;padding:18px 20px">
+    <div style="font-size:14px;font-weight:500;margin-bottom:6px">Dashboard Link Sync from Vercel Deploys</div>
+    <div style="font-size:12px;color:var(--grey);line-height:1.55;margin-bottom:14px">Queries Vercel API for new deployments, compares against index.html, inserts a nav-card for anything not already linked.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;background:rgba(0,0,0,0.03);border-radius:6px;padding:10px 12px">
+        <span style="font-weight:500">1. Vercel API fetcher</span> <span style="color:rgba(125,125,125,0.6);margin-left:6px">~30 min</span>
+        <div style="color:var(--grey);margin-top:3px">Script that authenticates + lists deployments. Done = clean list matches what's live.</div>
+      </div>
+      <div style="font-size:12px;background:rgba(0,0,0,0.03);border-radius:6px;padding:10px 12px">
+        <span style="font-weight:500">2. HTML sync logic</span> <span style="color:rgba(125,125,125,0.6);margin-left:6px">~30 min</span>
+        <div style="color:var(--grey);margin-top:3px">Reads index.html, finds existing hrefs, injects new nav-card for missing deploys. Done = no duplicates.</div>
+      </div>
+      <div style="font-size:12px;background:rgba(0,0,0,0.03);border-radius:6px;padding:10px 12px">
+        <span style="font-weight:500">3. Auto-trigger hook</span> <span style="color:rgba(125,125,125,0.6);margin-left:6px">~20 min</span>
+        <div style="color:var(--grey);margin-top:3px">Claude Code hook fires after vercel CLI commands. Done = deploy → card appears, no manual step.</div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
