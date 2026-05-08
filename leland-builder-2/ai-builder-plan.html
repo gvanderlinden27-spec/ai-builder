@@ -596,10 +596,71 @@
     border-left-width: 3px; border-left-style: solid;
   }
 
+  /* ── Reflection & Build Grid ── */
+  .reflection-block {
+    background: var(--black);
+    padding: 36px;
+    margin-bottom: 32px;
+  }
+  .reflection-body {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--sand);
+    max-width: 700px;
+  }
+  .reflection-body p { margin-bottom: 16px; }
+  .reflection-body p:last-child { margin-bottom: 0; }
+  .build-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid rgba(0,0,0,0.12);
+  }
+  .build-card {
+    padding: 24px;
+    border-right: 1px solid rgba(0,0,0,0.12);
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .build-card:nth-child(3n) { border-right: none; }
+  .build-card:nth-last-child(-n+3) { border-bottom: none; }
+  .build-num {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+  .build-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--black);
+    line-height: 1.3;
+  }
+  .build-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  .build-tag {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grey);
+    border: 1px solid rgba(0,0,0,0.15);
+    padding: 3px 8px;
+  }
+
   @media (max-width: 900px) {
     header, .container, footer { padding: 24px; }
-    .finding-grid, .sprint-grid, .url-block { grid-template-columns: 1fr; }
-    .finding-card, .url-item, .sprint-card { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.12); }
+    .finding-grid, .sprint-grid, .url-block, .build-grid { grid-template-columns: 1fr; }
+    .finding-card, .url-item, .sprint-card, .build-card { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.12); }
     .auto-header { flex-direction: column; }
     .flow-steps { flex-direction: column; }
     .flow-step { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.12); }
@@ -1045,6 +1106,93 @@
       <button class="btn" onclick="openModal('modal-eval-what')">What I Built</button>
       <button class="btn" onclick="openModal('modal-eval-docs')">Documentation</button>
     </div>
+  </div>
+
+</div>
+
+<!-- [7] WHAT I LEARNED -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">[7]</span>
+    <span class="section-title">What I Learned — 6-Session Reflection</span>
+  </div>
+
+  <div class="reflection-block">
+    <div class="reflection-body">
+      <p>Six sessions, one real system running daily.</p>
+      <p>Here's what I built: a live dashboard wired to Notion, a Vercel API handling the automation roadmap, a daily n8n workflow that reads my inbox, filters the noise, drafts replies in my voice, and pings me on Slack. A 10-article knowledge wiki trained on how I write and why members renew. A complete build spec for automating membership renewals against real June targets. And an eval system — two loops measuring whether the email manager is actually getting better.</p>
+      <p>The biggest shift wasn't any single build. It was learning to think in systems instead of tasks. Session 1, I was asking "can AI do this?" By session 6, I was asking "how do I know if it's working?" That's a different question and a harder one.</p>
+      <p>Strongest build: the email manager, because it runs every day without me. That's the bar.</p>
+      <p>What's next: get the renewal automation live before June. The HubSpot triggers are already scoped.</p>
+    </div>
+  </div>
+
+  <div class="build-grid">
+
+    <div class="build-card">
+      <div class="build-num">S1</div>
+      <div class="build-name">Time Audit + AI Builder Plan</div>
+      <div class="build-tags">
+        <span class="build-tag">Time audit dashboard</span>
+        <span class="build-tag">6 automation briefs</span>
+        <span class="build-tag">Sprint roadmap</span>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="build-num">S2</div>
+      <div class="build-name">Website + Data Collection</div>
+      <div class="build-tags">
+        <span class="build-tag">Live kanban board</span>
+        <span class="build-tag">Notion API</span>
+        <span class="build-tag">Vercel deploy</span>
+        <span class="build-tag">Advisor agent</span>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="build-num">S3</div>
+      <div class="build-name">n8n Cloud Email Manager</div>
+      <div class="build-tags">
+        <span class="build-tag">Daily workflow</span>
+        <span class="build-tag">Haiku categorizer</span>
+        <span class="build-tag">Sonnet drafter</span>
+        <span class="build-tag">Slack summary</span>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="build-num">S4</div>
+      <div class="build-name">Knowledge Wiki</div>
+      <div class="build-tags">
+        <span class="build-tag">10-article wiki</span>
+        <span class="build-tag">Renewal spec</span>
+        <span class="build-tag">Build spec</span>
+        <span class="build-tag">/ingest-info skill</span>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="build-num">S5</div>
+      <div class="build-name">Renewal Email Automation</div>
+      <div class="build-tags">
+        <span class="build-tag">HubSpot trigger</span>
+        <span class="build-tag">Claude email gen</span>
+        <span class="build-tag">Superhuman delivery</span>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="build-num">S6</div>
+      <div class="build-name">AI Eval System</div>
+      <div class="build-tags">
+        <span class="build-tag">Classification eval</span>
+        <span class="build-tag">LLM-as-a-judge</span>
+        <span class="build-tag">Quality scoring</span>
+        <span class="build-tag">Google Sheets</span>
+      </div>
+    </div>
+
   </div>
 
 </div>
