@@ -545,6 +545,57 @@
     margin: 24px 0;
   }
 
+  /* ── Workflow Diagram ── */
+  .wf-diagram { padding: 4px 0; }
+  .wf-row { display: flex; align-items: center; flex-wrap: wrap; }
+  .wf-fork { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .wf-branch { display: flex; flex-direction: column; align-items: center; }
+  .wf-node {
+    border: 1px solid rgba(0,0,0,0.22);
+    border-left-width: 3px;
+    padding: 8px 12px;
+    min-width: 100px;
+    max-width: 145px;
+    text-align: center;
+    background: var(--sand);
+    flex-shrink: 0;
+  }
+  .wf-node-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--black);
+    line-height: 1.4;
+  }
+  .wf-node-sub { font-size: 9px; color: var(--grey); margin-top: 2px; line-height: 1.4; }
+  .wf-arrow-h { font-size: 14px; color: var(--grey); padding: 0 5px; flex-shrink: 0; line-height: 1; }
+  .wf-arrow-v { font-size: 12px; color: var(--grey); padding: 3px 0; text-align: center; line-height: 1; }
+  .wf-branch-label {
+    font-size: 9px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--grey); margin-bottom: 4px; text-align: center;
+  }
+  .wf-n8n    { border-left-color: #e85c0d; }
+  .wf-gmail  { border-left-color: #EA4335; }
+  .wf-sheets { border-left-color: #34A853; }
+  .wf-slack  { border-left-color: #4A154B; }
+  .wf-haiku  { border-left-color: #C8922A; }
+  .wf-sonnet { border-left-color: #7B5600; }
+  .wf-eval   { border-style: dashed; }
+  .wf-legend {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+  .wf-legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--grey); letter-spacing: 0.03em; }
+  .wf-legend-swatch {
+    width: 12px; height: 12px; flex-shrink: 0;
+    border-top: 1px solid rgba(0,0,0,0.15);
+    border-right: 1px solid rgba(0,0,0,0.15);
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+    border-left-width: 3px; border-left-style: solid;
+  }
+
   @media (max-width: 900px) {
     header, .container, footer { padding: 24px; }
     .finding-grid, .sprint-grid, .url-block { grid-template-columns: 1fr; }
@@ -839,10 +890,85 @@
   </div>
 </div>
 
-<!-- [4] SPRINT ROADMAP -->
+<!-- [4] SPRINT 4 -->
 <div class="section">
   <div class="section-header">
     <span class="section-num">[4]</span>
+    <span class="section-title">Sprint 4 — What I Built</span>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 01 · Automation Spec</div>
+        <div class="auto-outcome">When a 47G membership deal hits 60 days before renewal, automatically generate a personalized renewal email draft — pre-addressed, priced, and backed by real HubSpot activity data — ready to review and send from Superhuman.</div>
+      </div>
+      <div class="tag">S5 Build</div>
+    </div>
+    <div>
+      <div class="field-label">What was scoped</div>
+      <div class="field-body">Fully scoped the renewal email automation end-to-end: HubSpot deal trigger (60 days out), API data pull (contact, deal value, 5 most recent activity notes), Claude-generated email body, and Superhuman draft delivery. Superhuman MCP identified as the preferred delivery mechanism — to be connected at sprint start.</div>
+    </div>
+    <div>
+      <div class="field-label">Key decisions made</div>
+      <div class="field-body"><strong>No auto-send</strong> — human review required before every email goes out. <strong>Price in Para 1</strong> — pulled directly from HubSpot deal value, flagged if missing. <strong>Assumptive tone</strong> — renewal framed as a given, not a question. Upsells handled manually, never by the automation.</div>
+    </div>
+    <div class="auto-footer">
+      <span class="effort-tag">Scoped · Ready to build</span>
+      <span class="status-tag done">Spec complete</span>
+    </div>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 02 · Knowledge Wiki</div>
+        <div class="auto-outcome">10-article knowledge base in renewal-wiki/ — covering audience, tone, email structure, HubSpot data, pricing rules, and value delivery — ready to load at runtime so the AI writes like Gerritt, not like a template.</div>
+      </div>
+      <div class="tag">10 articles</div>
+    </div>
+    <div>
+      <div class="field-label">What was built</div>
+      <div class="field-body">Built a flat <code>.md</code> wiki at <code>renewal-wiki/</code> with 10 cross-linked articles covering: who we write to, member relationship context, what value looks like, HubSpot data available, email structure, tone &amp; voice, what to avoid, pricing rules, index, and changelog. Each article uses <code>[[wikilinks]]</code> for cross-linking — compatible with Obsidian graph view and readable directly by the automation at runtime.</div>
+    </div>
+    <div>
+      <div class="field-label">How it works</div>
+      <div class="field-body">The automation loads all 8 knowledge articles before generating any email draft. Articles cover every decision the AI needs to make — structure, tone, proof of value, pricing edge cases, and phrases to avoid. A <code>/ingest-info</code> skill was created to add new sources to the wiki without manual editing.</div>
+    </div>
+    <div class="auto-footer">
+      <span class="effort-tag">Medium Lift · 1 session</span>
+      <span class="status-tag done">Done</span>
+    </div>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-header">
+      <div>
+        <div class="auto-rank">Deliverable 03 · Build Spec</div>
+        <div class="auto-outcome">Execution-ready build spec for Sprint 5 — trigger, inputs, output format, destination, knowledge base files to load, tools and credentials, quality bar, and 6 known failure points with handling for each.</div>
+      </div>
+      <div class="tag">s5-build-spec.md</div>
+    </div>
+    <div>
+      <div class="field-label">What was built</div>
+      <div class="field-body">Produced <code>s5-build-spec.md</code> — a complete handoff document combining the scoped automation and wiki into a single reference. Covers every field pulled from HubSpot, exact Gmail draft structure, which wiki articles to load at runtime, all required credentials, a 7-point quality checklist, and a failure-mode table with cause and handling for each scenario.</div>
+    </div>
+    <div>
+      <div class="field-label">What's next</div>
+      <div class="field-body">Sprint 5 opens by connecting the Superhuman MCP, then executes the three sub-builds in sequence: (1) HubSpot trigger + data pull, (2) Claude email generation, (3) Superhuman draft delivery. Test target: June 2026 renewals.</div>
+    </div>
+    <div class="auto-footer">
+      <span class="effort-tag">Quick Win · 1 session</span>
+      <span class="status-tag done">Done</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- [5] SPRINT ROADMAP -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">[5]</span>
     <span class="section-title">My System — Sprint Roadmap</span>
   </div>
   <div class="sprint-grid">
@@ -853,45 +979,43 @@
       <div class="sprint-status">Complete</div>
     </div>
 
-    <div class="sprint-card current">
-      <div class="sprint-label">S2 · Current</div>
+    <div class="sprint-card done">
+      <div class="sprint-label">S2</div>
       <div class="sprint-name">Deployed website + data collection tool</div>
-      <div class="sprint-status">In progress</div>
+      <div class="sprint-status">Complete</div>
     </div>
 
-    <div class="sprint-card">
+    <div class="sprint-card done">
       <div class="sprint-label">S3</div>
       <div class="sprint-name">Automated n8n or Claude Routines workflow</div>
-      <div class="sprint-status">Coming in Sprint 3</div>
+      <div class="sprint-status">Complete</div>
     </div>
 
-    <div class="sprint-card">
+    <div class="sprint-card done">
       <div class="sprint-label">S4</div>
       <div class="sprint-name">Knowledge wiki context system</div>
-      <div class="sprint-status">Coming in Sprint 4</div>
+      <div class="sprint-status">Complete</div>
     </div>
 
-    <div class="sprint-card">
+    <div class="sprint-card done">
       <div class="sprint-label">S5</div>
-      <div class="sprint-name">Custom agentic workflow</div>
-      <div class="sprint-status">Coming in Sprint 5</div>
+      <div class="sprint-name">Renewal email automation — live build</div>
+      <div class="sprint-status">Complete</div>
     </div>
 
-    <div class="sprint-card">
-      <div class="sprint-label">S6</div>
+    <div class="sprint-card current">
+      <div class="sprint-label">S6 · Current</div>
       <div class="sprint-name">Eval System (Tested and documented)</div>
-      <div class="sprint-status">Coming in Sprint 6</div>
+      <div class="sprint-status">Complete</div>
     </div>
 
   </div>
 </div>
 
-</div>
-
-<!-- [5] AI PROJECTS -->
+<!-- [6] AI PROJECTS -->
 <div class="section">
   <div class="section-header">
-    <span class="section-num">[5]</span>
+    <span class="section-num">[6]</span>
     <span class="section-title">AI Projects — Built & Deployed</span>
   </div>
 
@@ -906,6 +1030,20 @@
     <div class="project-actions">
       <button class="btn" onclick="openModal('modal-what-i-built')">What I Built</button>
       <button class="btn" onclick="openModal('modal-documentation')">Documentation</button>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="project-header">
+      <div>
+        <div class="project-title">AI Eval System</div>
+        <div class="project-desc">A two-loop evaluation system that automatically measures the accuracy and quality of my email manager's outputs.</div>
+      </div>
+      <div class="tag">Sprint 6</div>
+    </div>
+    <div class="project-actions">
+      <button class="btn" onclick="openModal('modal-eval-what')">What I Built</button>
+      <button class="btn" onclick="openModal('modal-eval-docs')">Documentation</button>
     </div>
   </div>
 
@@ -1051,9 +1189,169 @@ Draft guidelines:
   </div>
 </div>
 
+<!-- MODAL: Eval System — What I Built -->
+<div class="modal-overlay" id="modal-eval-what">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-eval-what')">Close ✕</button>
+    <div class="modal-eyebrow">AI Eval System</div>
+    <div class="modal-title">What I Built</div>
+
+    <div class="modal-section">
+      <div class="modal-body">
+        Two evaluation loops run automatically alongside the email manager. The first is a classification eval; every email categorization gets logged to Google Sheets with the AI's label, and a formula auto-calculates accuracy against my human labels. The second is an LLM-as-a-judge eval; after each draft is created, Claude Sonnet scores it on four criteria: tone, length, context awareness, and actionability, each on a 1–4 scale. Scores and rationale log to a second sheet with a running average quality score. Together these create a feedback loop for iterating on prompts, temperature, and model choice.
+      </div>
+    </div>
+
+    <hr class="modal-divider">
+
+    <div class="modal-section">
+      <div class="modal-label">Eval Loop 1 — Classification Accuracy</div>
+      <div class="modal-body">
+        Every email that runs through the categorizer is logged to Google Sheets: subject, sender, AI label (URGENT / REPLY_NEEDED / FYI / NOISE), and a column for my human label. A formula auto-calculates accuracy as a running percentage — giving a direct signal on whether Haiku is classifying correctly.
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">Eval Loop 2 — Draft Quality (LLM-as-a-Judge)</div>
+      <div class="modal-body">
+        After each draft is created, a second Claude Sonnet node evaluates it on four criteria — <strong>tone</strong>, <strong>length</strong>, <strong>context awareness</strong>, and <strong>actionability</strong> — each scored 1–4. Scores and the judge's rationale log to a separate Google Sheet with a running average quality score. This creates a measurable signal for iterating on the drafter's system prompt, temperature, and model choice.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Eval System — Documentation -->
+<div class="modal-overlay" id="modal-eval-docs">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-eval-docs')">Close ✕</button>
+    <div class="modal-eyebrow">AI Eval System</div>
+    <div class="modal-title">Documentation — Workflow Diagram</div>
+
+    <div class="modal-section">
+      <div class="modal-label">Workflow</div>
+
+      <div class="wf-diagram">
+
+        <!-- Row 1: main ingestion pipeline -->
+        <div class="wf-row">
+          <div class="wf-node wf-n8n">
+            <div class="wf-node-title">Schedule Trigger</div>
+            <div class="wf-node-sub">Daily at 4pm</div>
+          </div>
+          <div class="wf-arrow-h">→</div>
+          <div class="wf-node wf-gmail">
+            <div class="wf-node-title">Gmail</div>
+            <div class="wf-node-sub">Get last 24hrs</div>
+          </div>
+          <div class="wf-arrow-h">→</div>
+          <div class="wf-node wf-haiku">
+            <div class="wf-node-title">Email Categorizer</div>
+            <div class="wf-node-sub">Claude Haiku 4.5</div>
+          </div>
+        </div>
+
+        <!-- Fork from Email Categorizer -->
+        <div class="wf-fork" style="margin-top:0; padding-left:4px;">
+
+          <!-- Left branch: Eval #1 -->
+          <div class="wf-branch">
+            <div class="wf-arrow-v">↓</div>
+            <div class="wf-branch-label">Classification Eval</div>
+            <div class="wf-node wf-sheets wf-eval">
+              <div class="wf-node-title">Evaluation #1</div>
+              <div class="wf-node-sub">Google Sheets — AI label + accuracy formula</div>
+            </div>
+          </div>
+
+          <!-- Right branch: reply path -->
+          <div class="wf-branch">
+            <div class="wf-arrow-v">↓</div>
+            <div class="wf-node wf-n8n">
+              <div class="wf-node-title">If Needs Reply</div>
+              <div class="wf-node-sub">Filter to drafting</div>
+            </div>
+            <div class="wf-arrow-v">↓</div>
+            <div class="wf-node wf-sonnet">
+              <div class="wf-node-title">Email Drafter Agent</div>
+              <div class="wf-node-sub">Claude Sonnet 4.5</div>
+            </div>
+
+            <!-- Sub-fork from Email Drafter -->
+            <div class="wf-fork" style="margin-top:0;">
+
+              <!-- Sub-left: Summarize → Slack -->
+              <div class="wf-branch">
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-n8n">
+                  <div class="wf-node-title">Summarize</div>
+                  <div class="wf-node-sub">Compile drafts</div>
+                </div>
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-slack">
+                  <div class="wf-node-title">Slack</div>
+                  <div class="wf-node-sub">DM summary + links</div>
+                </div>
+              </div>
+
+              <!-- Sub-right: Merge → judge → Eval #2 -->
+              <div class="wf-branch">
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-n8n">
+                  <div class="wf-node-title">Merge</div>
+                  <div class="wf-node-sub">Joins If Needs Reply + Drafter</div>
+                </div>
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-n8n">
+                  <div class="wf-node-title">Select &amp; Format</div>
+                  <div class="wf-node-sub">Prep email + draft for eval</div>
+                </div>
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-sonnet">
+                  <div class="wf-node-title">LLM-as-a-judge</div>
+                  <div class="wf-node-sub">Claude Sonnet 4.5 — scores tone, length, context, actionability</div>
+                </div>
+                <div class="wf-arrow-v">↓</div>
+                <div class="wf-node wf-sheets wf-eval">
+                  <div class="wf-node-title">Evaluation #2</div>
+                  <div class="wf-node-sub">Google Sheets — scores + rationale</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Legend -->
+        <div class="wf-legend">
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#e85c0d"></div>n8n
+          </div>
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#EA4335"></div>Gmail
+          </div>
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#34A853"></div>Google Sheets
+          </div>
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#4A154B"></div>Slack
+          </div>
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#C8922A"></div>Claude Haiku 4.5
+          </div>
+          <div class="wf-legend-item">
+            <div class="wf-legend-swatch" style="border-left-color:#7B5600"></div>Claude Sonnet 4.5
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
-  <span>AI Builder Automation Portfolio — April 24, 2026 · Sprint 2</span>
+  <span>AI Builder Automation Portfolio — May 1, 2026 · Sprint 4</span>
   <span>Gerritt Vander Linden · 47G</span>
 </footer>
 
